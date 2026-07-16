@@ -74,6 +74,47 @@
     padding:9px 15px; border-radius:999px;
   }
 
+  /* ================= SECCIÓN 0 · MÁSCARA DE APERTURA =================
+     El video entra a pantalla completa y la capa verde se cierra hasta
+     posarse en el logo (el reverso del efecto de Apple). El video nunca
+     se toca: solo escala la capa, así que todo corre en GPU.
+     Los clips se encadenan con fundido; en teléfono se sirve el reel
+     vertical porque un 16:9 con cover solo mostraría el 26% de su ancho. */
+  .gzmx-wrap{ position:relative; height:340vh; }
+  .gzmx-stage{
+    position:sticky; top:0; overflow:hidden; background:var(--gz-green);
+    height:100vh; height:100svh;   /* svh: sin salto por la barra del navegador */
+  }
+  .gzmx-video{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; display:block;
+    opacity:0; transition:opacity 600ms ease;
+  }
+  .gzmx-video.on{ opacity:1; }
+  .gzmx-mask{
+    position:absolute; inset:0;
+    background:var(--gz-green);
+    -webkit-mask-image:url('logo-verde.png'), linear-gradient(#000,#000);
+            mask-image:url('logo-verde.png'), linear-gradient(#000,#000);
+    -webkit-mask-size:var(--gzmx-logo, 420px) auto, 100% 100%;
+            mask-size:var(--gzmx-logo, 420px) auto, 100% 100%;
+    -webkit-mask-repeat:no-repeat, no-repeat;
+            mask-repeat:no-repeat, no-repeat;
+    -webkit-mask-position:center, center;
+            mask-position:center, center;
+    -webkit-mask-composite:xor;      /* Safari */
+            mask-composite:exclude;  /* estándar */
+    transform-origin:center center;
+    will-change:transform;
+  }
+  .gzmx-pista{
+    position:absolute; left:0; right:0; bottom:26px; z-index:4; text-align:center;
+    font-size:10.5px; font-weight:700; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--gz-menta-p); opacity:0; pointer-events:none;
+    animation: gzmx-hint 2.6s ease-in-out 1.2s infinite;
+  }
+  @keyframes gzmx-hint{ 0%,100%{opacity:0; transform:translateY(0)} 50%{opacity:.75; transform:translateY(5px)} }
+
   /* ================= SECCIÓN 1 · PORTADA =================
      Logo oficial + abanico de 3 tarjetas con los videos y fotos
      REALES de grattisimo.com (CDN de Wix, URLs permanentes):
@@ -564,6 +605,16 @@
     <a class="nav-cta" href="https://wa.me/50255740469?text=%C2%A1Hola%21%20Quiero%20hacer%20un%20pedido%20%F0%9F%8D%A6" target="_blank" rel="noopener">Pedir 🍦</a>
   </nav>
 </header>
+
+<!-- ============ SECCIÓN 0 · MÁSCARA DE APERTURA (el video se cierra en el logo) ============ -->
+<div class="gzmx-wrap" id="gzmxWrap">
+  <div class="gzmx-stage">
+    <video class="gzmx-video" id="gzmxA" muted playsinline preload="auto" aria-hidden="true"></video>
+    <video class="gzmx-video" id="gzmxB" muted playsinline preload="auto" aria-hidden="true"></video>
+    <div class="gzmx-mask" id="gzmxMask" role="img" aria-label="Logo de Grattisimo revelándose sobre videos de sus helados naturales"></div>
+    <p class="gzmx-pista">Baja ↓</p>
+  </div>
+</div>
 
 <!-- ============ SECCIÓN 1 · PORTADA (logo + media real de grattisimo.com) ============ -->
 <section class="gz-top" id="gzTop">
@@ -1130,6 +1181,83 @@
 
   updateUI();
   render();
+})();
+</script>
+
+<!-- ===== Máscara de apertura: el video se cierra en el logo ===== -->
+<script>
+(function(){
+  "use strict";
+  var wrap=document.getElementById('gzmxWrap'), mask=document.getElementById('gzmxMask');
+  var A=document.getElementById('gzmxA'), B=document.getElementById('gzmxB');
+  if(!wrap||!mask||!A||!B) return;
+  var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var CDN='https://video.wixstatic.com/video/';
+  /* duraciones medidas: coco 3.6s · leche 2.9s · closeup 2.5s → montaje de ~9s.
+     El reel de fresa (31s, vertical) es el que sirve en teléfono. */
+  var V=[
+    '041a89_59ab12dcaa4a432cb24eb9887c7a2ed2',  /* 0 coco b-roll   1280x720 */
+    '041a89_9e0d195039f644c3881bb0d7a2a02b23',  /* 1 leche de coco 1280x720 */
+    '041a89_101c75be2973457f8d0f3b8046547e3a',  /* 2 coco close-up 1280x720 */
+    '041a89_1b44a07fdf5e4d7683314d5afddbd186'   /* 3 reel fresa    vertical */
+  ];
+  var MAX=60;                       /* zoom máximo de la capa */
+  var movil=function(){ return window.matchMedia('(max-width:760px)').matches; };
+  function lista(){ return movil() ? [3] : [0,1,2]; }
+
+  var capas=[A,B], cur=0, pos=0;
+  function url(i){ return CDN+V[i]+'/720p/mp4/file.mp4'; }
+  function cargar(c,i){ if(c.dataset.i!==String(i)){ c.dataset.i=i; c.src=url(i); c.load(); } }
+  function play(c){ var p=c.play(); if(p&&p.catch) p.catch(function(){}); }
+
+  function arrancar(){
+    var L=lista(); pos=0; cur=0;
+    A.loop = B.loop = (L.length===1);
+    cargar(A,L[0]); A.classList.add('on'); B.classList.remove('on');
+    if(!reduce) play(A);
+    if(L.length>1) cargar(B,L[1]);
+  }
+  function siguiente(){
+    var L=lista(); if(L.length<2) return;
+    var otra=capas[1-cur];
+    otra.currentTime=0; play(otra);
+    otra.classList.add('on'); capas[cur].classList.remove('on');
+    cur=1-cur; pos=(pos+1)%L.length;
+    setTimeout(function(){ cargar(capas[1-cur], L[(pos+1)%L.length]); }, 700);
+  }
+  A.addEventListener('ended', siguiente);
+  B.addEventListener('ended', siguiente);
+
+  function logoAncho(){
+    mask.style.setProperty('--gzmx-logo', Math.min(420, Math.round(innerWidth*0.84))+'px');
+  }
+
+  var ticking=false;
+  function paint(){
+    var r=wrap.getBoundingClientRect();
+    var total=wrap.offsetHeight-innerHeight;
+    var p=Math.min(1, Math.max(0, -r.top/(total||1)));
+    /* el video entra de golpe y desacelera hasta posarse en el logo */
+    var e=Math.pow(1-p, 2.2);
+    mask.style.transform='scale('+(1+(MAX-1)*e).toFixed(3)+')';
+    ticking=false;
+  }
+  addEventListener('scroll', function(){ if(!ticking){ ticking=true; requestAnimationFrame(paint); } }, {passive:true});
+  addEventListener('resize', function(){ logoAncho(); paint(); });
+
+  /* los videos solo corren mientras la apertura está en pantalla */
+  if(!reduce && 'IntersectionObserver' in window){
+    new IntersectionObserver(function(es){
+      for(var i=0;i<es.length;i++){
+        if(es[i].isIntersecting){ play(capas[cur]); }
+        else { A.pause(); B.pause(); }
+      }
+    }, {threshold:0.05}).observe(wrap);
+  }
+
+  logoAncho(); arrancar(); paint();
+  if(reduce) mask.style.transform='scale(1)';   /* sin movimiento: queda el logo */
 })();
 </script>
 

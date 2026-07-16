@@ -56,7 +56,7 @@
      El video de abajo nunca se toca; solo esta capa escala. */
   .mx-mask{
     position:absolute; inset:0;
-    background:var(--crema);
+    background:var(--verde);
     -webkit-mask-image:url('logo-verde.png'), linear-gradient(#000,#000);
             mask-image:url('logo-verde.png'), linear-gradient(#000,#000);
     -webkit-mask-size:var(--logo-w,420px) auto, 100% 100%;
@@ -85,9 +85,11 @@
 
 <div class="intro">
   <h1>El logo como ventana</h1>
-  <p>La técnica de Apple adaptada a tu marca: el video corre abajo sin tocarse, y encima va una capa
-    de <strong>tu color</strong> con el <strong>logo calado como hueco</strong>. Al bajar, el hueco crece
-    hasta que el video se toma la pantalla.</p>
+  <p>El video corre abajo sin tocarse, y encima va una capa de <strong>tu verde</strong> con el
+    <strong>logo calado como hueco</strong>. Solo esa capa escala.</p>
+  <p><strong>Por defecto va al revés que Apple:</strong> el video entra a pantalla completa y se va
+    cerrando hasta <strong>posarse en el logo</strong> — la marca aterriza, y queda viva con el video
+    corriendo dentro de las letras. En el panel puedes invertirlo.</p>
   <p class="flecha">↓ Baja despacio</p>
 </div>
 
@@ -112,9 +114,12 @@
   <button class="chip" data-v="1" type="button">Leche de coco</button>
   <button class="chip" data-v="2" type="button">Coco close‑up</button>
   <button class="chip" data-v="3" type="button">Reel fresa</button>
+  <b>Dirección</b>
+  <button class="chip" data-d="abre" type="button">Se abre → video</button>
+  <button class="chip on" data-d="cierra" type="button">Se cierra → logo</button>
   <b>Color</b>
-  <button class="chip on" data-c="var(--crema)" type="button">Crema</button>
-  <button class="chip" data-c="var(--verde)" type="button">Verde</button>
+  <button class="chip" data-c="var(--crema)" type="button">Crema</button>
+  <button class="chip on" data-c="var(--verde)" type="button">Verde</button>
   <button class="chip" data-c="var(--menta-p)" type="button">Menta</button>
   <b>Zoom máx <span class="val" id="zval">60</span>×</b>
   <input type="range" id="zoom" min="20" max="140" value="60">
@@ -137,6 +142,7 @@
   var zoom=document.getElementById('zoom'), logow=document.getElementById('logow');
   var zval=document.getElementById('zval'), lval=document.getElementById('lval');
   var MAX=+zoom.value, reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var DIR='cierra';   /* 'abre' = logo→video (Apple) · 'cierra' = video→logo (la marca aterriza) */
 
   function setVideo(i){
     var v=VIDEOS[i];
@@ -151,8 +157,9 @@
     var r=wrap.getBoundingClientRect();
     var total=wrap.offsetHeight-innerHeight;
     var p=Math.min(1, Math.max(0, -r.top/(total||1)));
-    /* ease-out: arranca lento y se dispara al final, como Apple */
-    var e=Math.pow(p,2.2);
+    /* 'abre' : arranca lento y se dispara al final (como Apple)
+       'cierra': el video entra de golpe y desacelera hasta posarse en el logo */
+    var e=(DIR==='abre') ? Math.pow(p,2.2) : Math.pow(1-p,2.2);
     var s=1+(MAX-1)*e;
     mask.style.transform='scale('+s.toFixed(3)+')';
     ticking=false;
@@ -171,6 +178,12 @@
     b.addEventListener('click', function(){
       document.querySelectorAll('[data-c]').forEach(function(x){x.classList.remove('on')});
       b.classList.add('on'); mask.style.background=b.dataset.c;
+    });
+  });
+  document.querySelectorAll('[data-d]').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('[data-d]').forEach(function(x){x.classList.remove('on')});
+      b.classList.add('on'); DIR=b.dataset.d; paint();
     });
   });
   zoom.addEventListener('input', function(){ MAX=+zoom.value; zval.textContent=MAX; paint(); });

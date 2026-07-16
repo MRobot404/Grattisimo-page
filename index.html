@@ -168,11 +168,14 @@
     opacity:1; transform:rotate(7deg) translateY(12px); }
   .gz-top.play .gz-fan-card.ctr, .gz-top.done .gz-fan-card.ctr{
     opacity:1; transform:translateY(0); }
+  /* En teléfono el abanico se salía: la fila medía 418px en pantalla de 375
+     y generaba scroll lateral (la tarjeta derecha llegaba a 428). Con estos
+     valores la fila queda en 332px y sobran 22px a cada lado. */
   @media(max-width:560px){
-    .gz-fan-card{ width:36vw; border-radius:20px; }
-    .gz-fan-card.ctr{ width:48vw; }
-    .gz-fan-card.izq{ margin-right:-20px; }
-    .gz-fan-card.der{ margin-left:-20px; }
+    .gz-fan-card{ width:29vw; border-radius:16px; }
+    .gz-fan-card.ctr{ width:39vw; }
+    .gz-fan-card.izq{ margin-right:-16px; }
+    .gz-fan-card.der{ margin-left:-16px; }
   }
   .gz-spark.f1{ top:-4%; left:12%; }
   .gz-spark.f2{ top:5%; right:11%; color:var(--gz-green); font-size:15px; }

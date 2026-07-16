@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grattisimo — Maní con café</title>
+<style>
+  /* ============ PALETA GRATTISIMO (extraída del post/branding) ============ */
+  :root{
+    --gz-bg:      #EFEBE4;  /* papel cálido del fondo de la foto */
+    --gz-card:    #E9E4DB;
+    --gz-green:   #16382A;  /* verde oscuro del logo */
+    --gz-caramel: #D9A05F;  /* helado de maní */
+    --gz-choco:   #46281A;  /* cobertura de café/chocolate */
+    --gz-cream:   #F3E3C8;
+    --gz-pink:    #F1B5C4;  /* manga rosa de la foto */
+    --gz-stick:   #D8AC72;
+    --gz-line:    #FFFFFF;  /* línea decorativa */
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+  body{
+    background:var(--gz-bg);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    color:var(--gz-green);
+    display:grid;
+    place-items:center;
+    min-height:100vh;
+    overflow:hidden; /* el iframe no debe scrollear internamente */
+  }
+
+  .gz-hero{
+    width:100%;
+    max-width:420px;
+    padding:18px 16px 22px;
+    text-align:center;
+  }
+
+  /* ============ ESCENARIO ============ */
+  .gz-stage{
+    position:relative;
+    width:min(74vw, 300px);
+    aspect-ratio: 300/400;
+    margin:0 auto;
+    background:var(--gz-card);
+    border-radius:26px;
+    overflow:hidden; /* la mano "nace" por debajo del borde */
+  }
+
+  /* --- línea decorativa que se dibuja sola --- */
+  .gz-squiggle{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+  }
+  .gz-squiggle path{
+    fill:none;
+    stroke:var(--gz-line);
+    stroke-width:3;
+    stroke-linecap:round;
+    stroke-dasharray:1;
+    stroke-dashoffset:1; /* invisible hasta que arranca */
+  }
+
+  /* --- mano + paleta --- */
+  .gz-hand-pos{
+    position:absolute;
+    left:50%; bottom:-2px;
+    width:66%;
+    transform:translateX(-50%);
+  }
+  .gz-hand-wrap{
+    transform: translateY(112%) rotate(7deg);
+    transform-origin: 50% 96%;
+    will-change: transform;
+  }
+  .gz-hand-wrap svg{ display:block; width:100%; height:auto; }
+
+  /* --- destellos --- */
+  .gz-spark{
+    position:absolute;
+    font-size:22px;
+    color:var(--gz-caramel);
+    opacity:0;
+    transform:scale(0);
+  }
+  .gz-spark.s1{ top:12%; left:12%; }
+  .gz-spark.s2{ top:20%; right:10%; color:var(--gz-green); font-size:16px; }
+
+  /* ============ COPY ============ */
+  .gz-copy{ margin-top:18px; }
+  .gz-eyebrow{
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+    font-weight:600; opacity:0; transform:translateY(14px);
+    color:var(--gz-choco);
+  }
+  .gz-h{
+    font-family: ui-serif, Georgia, 'Times New Roman', serif;
+    font-size:clamp(26px, 7vw, 34px);
+    font-weight:600; line-height:1.1;
+    margin-top:6px;
+    opacity:0; transform:translateY(14px);
+  }
+  .gz-sub{
+    font-size:14px; line-height:1.55;
+    max-width:300px; margin:8px auto 0;
+    color:#4A5A50;
+    opacity:0; transform:translateY(14px);
+  }
+  .gz-replay{
+    margin-top:14px;
+    border:1.5px solid var(--gz-green);
+    background:transparent; color:var(--gz-green);
+    font:600 12px/1 system-ui, sans-serif;
+    letter-spacing:.06em;
+    padding:9px 16px; border-radius:999px;
+    cursor:pointer;
+    opacity:0; transform:translateY(14px);
+    transition:background .2s, color .2s;
+  }
+  .gz-replay:hover{ background:var(--gz-green); color:var(--gz-cream); }
+
+  /* ============ TIMELINE (se dispara con .play vía IntersectionObserver) ============ */
+  .play .gz-squiggle path{
+    animation: gz-draw 1s cubic-bezier(.45,0,.2,1) .05s forwards;
+  }
+  .play .gz-hand-wrap{
+    animation:
+      gz-rise 1.15s cubic-bezier(.22,.9,.26,1.14) .25s forwards,
+      gz-tilt .95s ease-in-out 1.5s;
+  }
+  .play .gz-spark.s1{ animation: gz-pop .5s cubic-bezier(.2,1.4,.4,1) 1.55s forwards; }
+  .play .gz-spark.s2{ animation: gz-pop .5s cubic-bezier(.2,1.4,.4,1) 1.7s forwards; }
+  .play .gz-eyebrow{ animation: gz-fadeup .55s ease-out 1.25s forwards; }
+  .play .gz-h{      animation: gz-fadeup .55s ease-out 1.4s forwards; }
+  .play .gz-sub{    animation: gz-fadeup .55s ease-out 1.55s forwards; }
+  .play .gz-replay{ animation: gz-fadeup .55s ease-out 1.85s forwards; }
+
+  @keyframes gz-draw{ to{ stroke-dashoffset:0; } }
+
+  @keyframes gz-rise{
+    to{ transform: translateY(0) rotate(0deg); }
+  }
+  /* el "flick" de presentación al final — mantiene translateY(0) para no saltar */
+  @keyframes gz-tilt{
+    0%,100%{ transform: translateY(0) rotate(0deg); }
+    30%    { transform: translateY(0) rotate(-2.6deg); }
+    65%    { transform: translateY(0) rotate(1.4deg); }
+  }
+  @keyframes gz-pop{ to{ opacity:1; transform:scale(1); } }
+  @keyframes gz-fadeup{ to{ opacity:1; transform:translateY(0); } }
+
+  /* Estado final directo (reduced motion o fallback) */
+  .done .gz-squiggle path{ stroke-dashoffset:0; }
+  .done .gz-hand-wrap{ transform:none; }
+  .done .gz-spark, .done .gz-eyebrow, .done .gz-h, .done .gz-sub, .done .gz-replay{
+    opacity:1; transform:none;
+  }
+</style>
+</head>
+<body>
+
+<section class="gz-hero" id="gzHero">
+  <div class="gz-stage">
+    <!-- línea decorativa (como la del post) -->
+    <svg class="gz-squiggle" viewBox="0 0 300 400" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+      <path pathLength="1" d="M286 52
+        C 210 8, 78 34, 52 128
+        C 30 210, 74 300, 156 306
+        C 232 312, 268 250, 244 196
+        C 222 146, 150 140, 118 182"/>
+    </svg>
+
+    <!-- destellos -->
+    <span class="gz-spark s1" aria-hidden="true">✦</span>
+    <span class="gz-spark s2" aria-hidden="true">✦</span>
+
+    <!-- mano + paleta (ilustración SVG, sin assets externos) -->
+    <div class="gz-hand-pos">
+      <div class="gz-hand-wrap">
+        <svg viewBox="0 0 400 660" role="img" aria-label="Mano sosteniendo paleta de maní con café">
+          <defs>
+            <clipPath id="gzBody"><rect x="138" y="28" width="124" height="222" rx="30"/></clipPath>
+          </defs>
+          <!-- palito -->
+          <rect x="191" y="238" width="18" height="110" rx="8" fill="#D8AC72"/>
+          <rect x="191" y="238" width="8"  height="110" rx="4" fill="#C79A5F"/>
+
+          <!-- cuerpo de la paleta (maní) -->
+          <rect x="138" y="28" width="124" height="222" rx="30" fill="#DFAE72"/>
+
+          <!-- cobertura de café con goteo -->
+          <path fill="#46281A" d="M138 60 Q138 28 170 28 L230 28 Q262 28 262 60
+            L262 88 Q254 102 246 90 L246 118 Q237 132 229 116 L229 96
+            Q219 84 211 98 L211 136 Q201 150 193 134 L193 106
+            Q183 94 175 106 Q166 118 158 106 L158 122 Q148 132 138 118 Z"/>
+
+          <!-- veta marmoleada (clipped al cuerpo, cruza de borde a borde) -->
+          <g clip-path="url(#gzBody)">
+            <path d="M118 178 C 158 152, 182 210, 216 184 C 246 162, 264 174, 284 162"
+                  stroke="#46281A" stroke-width="15" fill="none" stroke-linecap="round" opacity=".9"/>
+            <path d="M122 218 C 168 198, 202 238, 246 212 C 264 202, 276 208, 288 202"
+                  stroke="#46281A" stroke-width="8" fill="none" stroke-linecap="round" opacity=".5"/>
+            <circle cx="168" cy="238" r="5" fill="#46281A" opacity=".45"/>
+            <circle cx="238" cy="146" r="4" fill="#46281A" opacity=".4"/>
+          </g>
+
+          <!-- brillo -->
+          <rect x="150" y="42" width="13" height="56" rx="6.5" fill="#FFFFFF" opacity=".16"/>
+
+          <!-- muñeca -->
+          <path d="M172 428 L228 428 L234 528 L166 528 Z" fill="#BD8052"/>
+
+          <!-- puño: respaldo de palma + dedos apilados -->
+          <rect x="153" y="320" width="98" height="118" rx="20" fill="#B27948"/>
+          <rect x="150" y="314" width="104" height="31" rx="15.5" fill="#C68A5B"/>
+          <rect x="147" y="347" width="110" height="31" rx="15.5" fill="#BD8052"/>
+          <rect x="150" y="380" width="104" height="30" rx="15"   fill="#C68A5B"/>
+          <rect x="153" y="412" width="98"  height="28" rx="14"   fill="#BD8052"/>
+
+          <!-- pulgar sobre el palito -->
+          <g transform="rotate(-8 197 310)">
+            <rect x="184" y="272" width="27" height="58" rx="13.5" fill="#CE9265"/>
+          </g>
+
+          <!-- manga rosa -->
+          <path d="M148 512 Q148 498 162 498 L238 498 Q252 498 252 512 L260 660 L140 660 Z"
+                fill="#F1B5C4"/>
+          <path d="M152 516 L248 516" stroke="#E39FB1" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="gz-copy">
+    <p class="gz-eyebrow">Grattisimo · Hecho natural</p>
+    <h2 class="gz-h">Maní con café</h2>
+    <p class="gz-sub">Cremoso e intenso, con ese toque que engancha desde la primera mordida.</p>
+    <button class="gz-replay" id="gzReplay" type="button">↺ Ver de nuevo</button>
+  </div>
+</section>
+
+<script>
+(function(){
+  var hero = document.getElementById('gzHero');
+  var played = false;
+
+  function play(){
+    if (played) return;
+    played = true;
+    hero.classList.add('play');
+  }
+
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (reduce) {
+    // sin animación: estado final directo
+    hero.classList.add('done');
+  } else if ('IntersectionObserver' in window) {
+    // root:null → dentro de un iframe cross-origin (Wix) esto mide la
+    // visibilidad real contra el viewport de la página PADRE. Es la única
+    // señal de scroll disponible desde un embed, y es exactamente la que usamos.
+    var io = new IntersectionObserver(function(entries){
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting) {
+          play();
+          io.disconnect();
+          break;
+        }
+      }
+    }, { root: null, threshold: 0.35 });
+    io.observe(hero);
+  } else {
+    play(); // fallback navegadores viejos
+  }
+
+  document.getElementById('gzReplay').addEventListener('click', function(){
+    hero.classList.remove('play', 'done');
+    void hero.offsetWidth; // reflow para reiniciar las animaciones
+    hero.classList.add('play');
+  });
+})();
+</script>
+</body>
+</html>

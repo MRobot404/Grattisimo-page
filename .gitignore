@@ -1,0 +1,19 @@
+# Sistema
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# Respaldos y temporales
+*.bak
+*.tmp
+_*.js
+_*.txt
+
+# Páginas guardadas desde el navegador
+*_files/
+*.htm

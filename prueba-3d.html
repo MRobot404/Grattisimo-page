@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grattisimo · Pruebas 3D con fotos reales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --verde:#014638; --menta:#6CC1B0; --menta-p:#97CFC1;
+    --rosa-ch:#F279A1; --cobre:#DB9677; --crema:#EFEBE4; --tinta:#0A2E27;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Montserrat',system-ui,sans-serif; color:var(--tinta);
+    background:var(--crema); line-height:1.55; -webkit-font-smoothing:antialiased;
+    padding:0 16px 60px;
+  }
+  header{max-width:1040px;margin:0 auto;padding:40px 0 6px;text-align:center}
+  header h1{font-weight:900;font-size:clamp(24px,4.4vw,38px);color:var(--verde);letter-spacing:-.02em}
+  header p{font-size:14.5px;color:#4A5A50;max-width:640px;margin:10px auto 0}
+  header .warn{
+    margin:16px auto 0;max-width:680px;font-size:13px;color:var(--verde);
+    background:#EAF3EF;border:1.5px solid var(--menta-p);border-radius:14px;padding:12px 16px;
+  }
+
+  /* selector de sabor */
+  .chips{max-width:1040px;margin:26px auto 30px;display:flex;flex-wrap:wrap;gap:9px;justify-content:center}
+  .chip{
+    font-family:inherit;font-weight:600;font-size:13px;cursor:pointer;
+    color:var(--verde);background:#fff;border:1.5px solid rgba(1,70,56,.2);
+    padding:9px 16px;border-radius:999px;
+    transition:transform 140ms cubic-bezier(.23,1,.32,1),background .2s,color .2s,border-color .2s;
+  }
+  .chip:hover{border-color:var(--menta)}
+  .chip:active{transform:scale(.95)}
+  .chip.on{background:var(--verde);color:var(--menta-p);border-color:var(--verde)}
+
+  /* paneles */
+  .panels{max-width:1040px;margin:0 auto;display:grid;gap:22px;grid-template-columns:1fr}
+  @media(min-width:820px){.panels{grid-template-columns:1fr 1fr}}
+  .panel{
+    background:#fff;border-radius:24px;padding:22px 20px 24px;
+    box-shadow:0 14px 40px rgba(1,70,56,.10);text-align:center;
+  }
+  .panel .tag{
+    display:inline-block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--cobre);margin-bottom:4px;
+  }
+  .panel h2{font-weight:900;font-size:20px;color:var(--verde);letter-spacing:-.01em}
+  .panel .desc{font-size:12.5px;color:#4A5A50;margin:6px auto 14px;max-width:340px;min-height:34px}
+
+  /* escenario común */
+  .stage{
+    position:relative;width:100%;height:440px;border-radius:20px;overflow:hidden;
+    background:
+      radial-gradient(60% 55% at 50% 46%, rgba(151,207,193,.45), transparent 72%),
+      linear-gradient(#F4FAF7,#EAF3EF);
+    display:flex;align-items:center;justify-content:center;
+    touch-action:pan-y;
+  }
+  .hint{
+    position:absolute;bottom:12px;left:50%;transform:translateX(-50%);
+    font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--cobre);
+    opacity:.8;pointer-events:none;
+  }
+
+  /* ---- Panel A: pseudo-3D ---- */
+  #stageA{perspective:1000px;cursor:crosshair}
+  #cardA{
+    position:relative;transform-style:preserve-3d;will-change:transform;
+    width:min(64%,240px);
+  }
+  #imgA{width:100%;height:auto;display:block;will-change:filter;
+    filter:drop-shadow(0 18px 22px rgba(1,70,56,.30));-webkit-user-drag:none;user-select:none}
+  #shadowA{
+    position:absolute;left:12%;right:12%;bottom:-4%;height:26px;border-radius:50%;
+    background:rgba(1,70,56,.34);filter:blur(12px);z-index:-1;
+  }
+
+  /* ---- Panel B: WebGL ---- */
+  #stageB{cursor:grab}
+  #stageB canvas{display:block;border-radius:20px;touch-action:pan-y}
+
+  /* ---- móvil: giroscopio ---- */
+  .gyro-btn{
+    display:none;margin:12px auto 0;font-family:inherit;font-weight:700;font-size:12.5px;cursor:pointer;
+    background:var(--verde);color:var(--menta-p);border:none;padding:11px 18px;border-radius:999px;
+    transition:transform 140ms cubic-bezier(.23,1,.32,1);
+  }
+  .gyro-btn:active{transform:scale(.95)}
+  .gyro-msg{font-size:11.5px;color:#4A5A50;margin-top:8px;min-height:15px}
+  @media(max-width:520px){
+    .stage{height:360px}
+    #cardA{width:min(70%,220px)}
+  }
+
+  footer{max-width:1040px;margin:34px auto 0;font-size:12.5px;color:#4A5A50;text-align:center;line-height:1.6}
+  footer b{color:var(--verde)}
+  .verdict{display:grid;gap:12px;grid-template-columns:1fr;max-width:1040px;margin:26px auto 0}
+  @media(min-width:820px){.verdict{grid-template-columns:1fr 1fr}}
+  .vbox{background:#fff;border-radius:16px;padding:16px 18px;text-align:left;font-size:12.5px;box-shadow:0 8px 22px rgba(1,70,56,.07)}
+  .vbox h3{font-size:13px;color:var(--verde);margin-bottom:6px}
+  .vbox .pro{color:#2c6b52}.vbox .con{color:#9a5a5a}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Paleta 3D · dos maneras con tus fotos reales</h1>
+  <p>La misma foto, dos técnicas. Elige un sabor arriba y compáralas. Mueve el mouse sobre la A y arrastra la B.</p>
+  <p class="warn">⚠️ Con <b>una sola foto plana por sabor</b> no existe la parte de atrás real. La <b>A</b> es la foto real con ilusión de profundidad; la <b>B</b> es un modelo 3D de verdad (girable 360°) pero estilizado, coloreado desde la foto.</p>
+</header>
+
+<div class="chips" id="chips"></div>
+
+<div class="panels">
+  <!-- PANEL A -->
+  <div class="panel">
+    <span class="tag">Opción A</span>
+    <h2>Pseudo-3D · tilt + parallax</h2>
+    <p class="desc">La foto real se inclina siguiendo el cursor, con sombra que se desplaza. Nítida y liviana.</p>
+    <div class="stage" id="stageA">
+      <div id="cardA">
+        <div id="shadowA"></div>
+        <img id="imgA" alt="Paleta Grattisimo">
+      </div>
+      <span class="hint" id="hintA">Mueve el mouse / arrastra</span>
+    </div>
+    <button class="gyro-btn" id="gyroBtn" type="button">📱 Activar movimiento del teléfono</button>
+    <p class="gyro-msg" id="gyroMsg"></p>
+  </div>
+
+  <!-- PANEL B -->
+  <div class="panel">
+    <span class="tag">Opción B</span>
+    <h2>Modelo WebGL · girable 360°</h2>
+    <p class="desc">Un objeto 3D real (malla + relieve) coloreado desde la foto. Estilizado, no la foto envuelta.</p>
+    <div class="stage" id="stageB">
+      <span class="hint">Arrástrala para girar 360°</span>
+    </div>
+  </div>
+</div>
+
+<div class="verdict">
+  <div class="vbox">
+    <h3>Opción A — cuándo conviene</h3>
+    <span class="pro">✓ Usa la foto real tal cual (apetitosa, nítida)</span><br>
+    <span class="pro">✓ Liviana, sin dependencias, funciona en todos lados</span><br>
+    <span class="con">✕ La ilusión se rompe si la giras mucho (no hay reverso real)</span>
+  </div>
+  <div class="vbox">
+    <h3>Opción B — cuándo conviene</h3>
+    <span class="pro">✓ 3D real: gira 360° completos, tiene volumen y bordes</span><br>
+    <span class="pro">✓ Se ve consistente desde cualquier ángulo</span><br>
+    <span class="con">✕ Estilizado (color del sabor), no la textura foto real</span><br>
+    <span class="con">✕ Más pesado (WebGL / Three.js)</span>
+  </div>
+</div>
+
+<footer>
+  <p>Ambas salen de la misma foto de <b>C:\Users\Quien\Downloads\HELADOS SIN FONDO…</b>. Un 360° con la foto <i>real</i> solo sería posible con más tomas orbitando cada paleta.</p>
+</footer>
+
+<script src="flavors-data.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  "use strict";
+  var F = window.FLAVORS || [];
+  if (!F.length){ document.body.insertAdjacentHTML('beforeend','<p style="text-align:center;color:#a33">No se cargó flavors-data.js</p>'); return; }
+  var cur = -1;
+
+  /* ---------- chips ---------- */
+  var chipsEl = document.getElementById('chips');
+  F.forEach(function(f,i){
+    var b = document.createElement('button');
+    b.className = 'chip'; b.type = 'button'; b.textContent = f.name;
+    b.addEventListener('click', function(){ setFlavor(i); });
+    chipsEl.appendChild(b);
+  });
+  function markChips(){ [].forEach.call(chipsEl.children, function(c,i){ c.classList.toggle('on', i===cur); }); }
+
+  /* ============ PANEL A: pseudo-3D tilt ============ */
+  var stageA=document.getElementById('stageA'), cardA=document.getElementById('cardA');
+  var imgA=document.getElementById('imgA'), shadowA=document.getElementById('shadowA');
+  var tRX=0,tRY=0,cRX=0,cRY=0,lastPtr=0,overA=false;
+  function ptrA(e){
+    var r=stageA.getBoundingClientRect();
+    var nx=Math.max(-1,Math.min(1,((e.clientX-r.left)/r.width-0.5)*2));
+    var ny=Math.max(-1,Math.min(1,((e.clientY-r.top)/r.height-0.5)*2));
+    tRY=nx*16; tRX=-ny*12; lastPtr=performance.now();
+  }
+  stageA.addEventListener('pointermove',ptrA);
+  stageA.addEventListener('pointerenter',function(){overA=true;});
+  stageA.addEventListener('pointerleave',function(){overA=false;});
+
+  /* ---- giroscopio: inclinar el teléfono = mover el mouse ---- */
+  var gyroBtn=document.getElementById('gyroBtn'), gyroMsg=document.getElementById('gyroMsg');
+  var gyroBase=null, gyroSeen=false;
+  var coarse=window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
+  function msg(t){ gyroMsg.textContent=t; }
+  function onOrient(e){
+    if(e.beta==null && e.gamma==null) return;
+    gyroSeen=true;
+    var beta=e.beta||0, gamma=e.gamma||0;
+    if(!gyroBase) gyroBase={b:beta,g:gamma};              /* calibra con la postura inicial */
+    var db=Math.max(-28,Math.min(28,beta-gyroBase.b));
+    var dg=Math.max(-28,Math.min(28,gamma-gyroBase.g));
+    tRY=(dg/28)*16; tRX=-(db/28)*12;
+    lastPtr=performance.now();                            /* evita que arranque el idle */
+  }
+  function listenGyro(){
+    window.addEventListener('deviceorientation',onOrient);
+    msg('Giroscopio activo — inclina el teléfono');
+    gyroBtn.style.display='none';
+    setTimeout(function(){ if(!gyroSeen) msg('Sin señal del sensor (requiere HTTPS) — desliza el dedo.'); },1600);
+  }
+  if(coarse){
+    document.getElementById('hintA').textContent='Inclina el teléfono · o desliza el dedo';
+    if(typeof DeviceOrientationEvent==='undefined'){
+      msg('Este dispositivo no reporta movimiento — desliza el dedo.');
+    } else if(typeof DeviceOrientationEvent.requestPermission==='function'){
+      gyroBtn.style.display='inline-block';               /* iPhone: requiere gesto del usuario */
+      msg('iPhone: toca el botón para permitir el sensor.');
+      gyroBtn.addEventListener('click',function(){
+        DeviceOrientationEvent.requestPermission().then(function(r){
+          if(r==='granted') listenGyro(); else msg('Permiso denegado — desliza el dedo.');
+        }).catch(function(){ msg('No se pudo activar (requiere HTTPS) — desliza el dedo.'); });
+      });
+    } else {
+      listenGyro();                                       /* Android */
+    }
+  }
+
+  (function frameA(){
+    if(!overA && performance.now()-lastPtr>900){
+      var s=performance.now()/1000; tRY=Math.sin(s*0.8)*9; tRX=Math.cos(s*0.7)*4;
+    }
+    cRX+=(tRX-cRX)*0.12; cRY+=(tRY-cRY)*0.12;
+    cardA.style.transform='rotateX('+cRX.toFixed(2)+'deg) rotateY('+cRY.toFixed(2)+'deg)';
+    shadowA.style.transform='translate('+(cRY*1.4).toFixed(1)+'px,'+(4-cRX*0.9).toFixed(1)+'px)';
+    shadowA.style.opacity=(0.30-Math.abs(cRX)/150).toFixed(3);
+    imgA.style.filter='drop-shadow(0 18px 22px rgba(1,70,56,.30)) brightness('+(1+cRY/160).toFixed(3)+')';
+    requestAnimationFrame(frameA);
+  })();
+  function setA(f){ imgA.src=f.img; }
+
+  /* ============ PANEL B: WebGL modelo real ============ */
+  var wrapB=document.getElementById('stageB');
+  var scene,camera,renderer,mesh,capMat,sideMat,group,SHAPE_ASPECT=0.5;
+  var bDrag=false,bLX=0,bLY=0,velY=0,velX=0,rotY=0,rotX=0.12,inited=false;
+
+  function popsicleShape(){
+    var s=new THREE.Shape();
+    var w=1.0,h=1.35,r=0.44,sw=0.24,sh=0.52;
+    var x0=-w/2,x1=w/2,yT=h/2,yB=-h/2;
+    s.moveTo(x0,yB+0.16);
+    s.lineTo(x0,yT-r);
+    s.quadraticCurveTo(x0,yT,x0+r,yT);
+    s.lineTo(x1-r,yT);
+    s.quadraticCurveTo(x1,yT,x1,yT-r);
+    s.lineTo(x1,yB+0.16);
+    s.quadraticCurveTo(x1,yB,x1-0.22,yB);
+    s.lineTo(sw/2,yB);
+    s.lineTo(sw/2,yB-sh+0.08);
+    s.quadraticCurveTo(sw/2,yB-sh,0,yB-sh);
+    s.quadraticCurveTo(-sw/2,yB-sh,-sw/2,yB-sh+0.08);
+    s.lineTo(-sw/2,yB);
+    s.lineTo(x0+0.22,yB);
+    s.quadraticCurveTo(x0,yB,x0,yB+0.16);
+    return s;
+  }
+  function remapCapUV(geo,shape){
+    var pts=shape.getPoints(60),minX=1e9,maxX=-1e9,minY=1e9,maxY=-1e9;
+    pts.forEach(function(p){minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y);});
+    var uw=maxX-minX,uh=maxY-minY; SHAPE_ASPECT=uw/uh;
+    var uv=geo.attributes.uv;
+    for(var i=0;i<uv.count;i++){ uv.setXY(i,(uv.getX(i)-minX)/uw,(uv.getY(i)-minY)/uh); }
+    uv.needsUpdate=true;
+  }
+  function darken(hex,f){var n=parseInt(hex.slice(1),16);return ((n>>16&255)*f|0)<<16 | ((n>>8&255)*f|0)<<8 | ((n&255)*f|0);}
+  function makeCapTexture(img,color){
+    var W=512,H=Math.round(W/SHAPE_ASPECT);
+    var c=document.createElement('canvas');c.width=W;c.height=H;
+    var g=c.getContext('2d');
+    g.fillStyle=color;g.fillRect(0,0,W,H);
+    var ar=img.width/img.height,car=W/H,dw,dh;
+    if(ar>car){dw=W*0.94;dh=dw/ar;}else{dh=H*0.96;dw=dh*ar;}
+    g.drawImage(img,(W-dw)/2,(H-dh)/2,dw,dh);
+    var t=new THREE.CanvasTexture(c); t.anisotropy=4; return t;
+  }
+  function initB(){
+    inited=true;
+    var w=wrapB.clientWidth,h=wrapB.clientHeight;
+    scene=new THREE.Scene();
+    camera=new THREE.PerspectiveCamera(38,w/h,0.1,100); camera.position.set(0,0,4.0);
+    renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+    renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+    renderer.setSize(w,h); wrapB.appendChild(renderer.domElement);
+    scene.add(new THREE.AmbientLight(0xffffff,0.92));
+    var d1=new THREE.DirectionalLight(0xffffff,0.7); d1.position.set(2,3,4); scene.add(d1);
+    var d2=new THREE.DirectionalLight(0xffffff,0.22); d2.position.set(-3,-1,2); scene.add(d2);
+    var shape=popsicleShape();
+    var geo=new THREE.ExtrudeGeometry(shape,{depth:0.24,bevelEnabled:true,bevelThickness:0.05,bevelSize:0.05,bevelSegments:2,curveSegments:24});
+    remapCapUV(geo,shape); geo.center();
+    capMat=new THREE.MeshStandardMaterial({roughness:0.6,metalness:0.02});
+    sideMat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.72});
+    mesh=new THREE.Mesh(geo,[capMat,sideMat]);
+    group=new THREE.Group(); group.add(mesh); scene.add(group);
+    var el=renderer.domElement;
+    el.addEventListener('pointerdown',function(e){bDrag=true;bLX=e.clientX;bLY=e.clientY;velY=velX=0;el.setPointerCapture(e.pointerId);wrapB.style.cursor='grabbing';});
+    el.addEventListener('pointermove',function(e){if(!bDrag)return;var dx=e.clientX-bLX,dy=e.clientY-bLY;bLX=e.clientX;bLY=e.clientY;velY=dx*0.01;velX=dy*0.01;rotY+=velY;rotX=Math.max(-0.6,Math.min(0.6,rotX+velX));});
+    el.addEventListener('pointerup',function(){bDrag=false;wrapB.style.cursor='grab';});
+    el.addEventListener('pointercancel',function(){bDrag=false;});
+    window.addEventListener('resize',function(){var w=wrapB.clientWidth,h=wrapB.clientHeight;camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h);});
+    (function loop(){
+      requestAnimationFrame(loop);
+      if(!bDrag){
+        if(Math.abs(velY)>0.0002||Math.abs(velX)>0.0002){rotY+=velY;velY*=0.94;rotX+=velX;velX*=0.9;rotX=Math.max(-0.6,Math.min(0.6,rotX));}
+        else{ rotY+=0.0045; }
+      }
+      if(group){ group.rotation.y=rotY; group.rotation.x=rotX; }
+      renderer.render(scene,camera);
+    })();
+  }
+  function setB(f){
+    if(typeof THREE==='undefined'){ wrapB.insertAdjacentHTML('afterbegin','<span style="position:absolute;top:12px;left:0;right:0;font-size:12px;color:#a33">WebGL (Three.js) no cargó — revisa tu conexión</span>'); return; }
+    if(!inited) initB();
+    var img=new Image();
+    img.onload=function(){
+      var tex=makeCapTexture(img,f.color);
+      if(capMat.map) capMat.map.dispose();
+      capMat.map=tex; capMat.needsUpdate=true;
+      sideMat.color.setHex(darken(f.color,0.72));
+    };
+    img.src=f.img;
+  }
+
+  /* ---------- cambiar sabor ---------- */
+  function setFlavor(i){ cur=i; markChips(); setA(F[i]); setB(F[i]); }
+  setFlavor(0);
+})();
+</script>
+</body>
+</html>

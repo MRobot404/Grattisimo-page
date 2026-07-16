@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grattisimo — Maní con café</title>
+<style>
+  /* ============ PALETA GRATTISIMO ============ */
+  :root{
+    --gz-bg:     #EFEBE4;  /* papel cálido */
+    --gz-photo:  #E8E7E5;  /* gris del fondo de la foto (para fundir bordes) */
+    --gz-green:  #16382A;  /* verde del logo */
+    --gz-choco:  #46281A;
+    --gz-cream:  #F3E3C8;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+  body{
+    background:var(--gz-bg);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    color:var(--gz-green);
+    display:grid; place-items:center;
+    min-height:100vh;
+    overflow:hidden;
+  }
+
+  .gz-hero{ width:100%; max-width:420px; padding:18px 16px 22px; text-align:center; }
+
+  /* ============ ESCENARIO (tarjeta con la foto) ============ */
+  .gz-stage{
+    position:relative;
+    width:min(76vw, 310px);
+    aspect-ratio: 4/5;              /* proporción de la foto (720x900) */
+    margin:0 auto;
+    background:var(--gz-photo);     /* mismo gris que la foto → la mano parece
+                                       subir sola, sin verse el borde del JPG */
+    border-radius:26px;
+    overflow:hidden;
+  }
+  .gz-photo{
+    position:absolute; inset:0;
+    width:100%; height:100%;
+    object-fit:cover;
+    /* estado inicial: fuera de cuadro, abajo */
+    transform: translateY(103%) rotate(4deg) scale(1.05);
+    transform-origin: 50% 115%;
+    will-change: transform;
+  }
+
+  /* destellos */
+  .gz-spark{
+    position:absolute; font-size:22px; color:#C98A4B;
+    opacity:0; transform:scale(0);
+  }
+  .gz-spark.s1{ top:10%; left:10%; }
+  .gz-spark.s2{ top:18%; right:9%; color:var(--gz-green); font-size:15px; }
+
+  /* ============ COPY ============ */
+  .gz-copy{ margin-top:18px; }
+  .gz-eyebrow{
+    font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+    font-weight:600; color:var(--gz-choco);
+    opacity:0; transform:translateY(14px);
+  }
+  .gz-h{
+    font-family: ui-serif, Georgia, 'Times New Roman', serif;
+    font-size:clamp(26px, 7vw, 34px);
+    font-weight:600; line-height:1.1; margin-top:6px;
+    opacity:0; transform:translateY(14px);
+  }
+  .gz-sub{
+    font-size:14px; line-height:1.55;
+    max-width:300px; margin:8px auto 0; color:#4A5A50;
+    opacity:0; transform:translateY(14px);
+  }
+  .gz-replay{
+    margin-top:14px;
+    border:1.5px solid var(--gz-green);
+    background:transparent; color:var(--gz-green);
+    font:600 12px/1 system-ui, sans-serif; letter-spacing:.06em;
+    padding:9px 16px; border-radius:999px; cursor:pointer;
+    opacity:0; transform:translateY(14px);
+    transition:background .2s, color .2s;
+  }
+  .gz-replay:hover{ background:var(--gz-green); color:var(--gz-cream); }
+
+  /* ============ TIMELINE (disparado por IntersectionObserver → .play) ============ */
+  .play .gz-photo{
+    animation:
+      gz-rise 1.2s cubic-bezier(.22,.9,.26,1.12) .15s forwards,
+      gz-tilt 1s ease-in-out 1.45s;
+  }
+  .play .gz-spark.s1{ animation: gz-pop .5s cubic-bezier(.2,1.4,.4,1) 1.5s forwards; }
+  .play .gz-spark.s2{ animation: gz-pop .5s cubic-bezier(.2,1.4,.4,1) 1.65s forwards; }
+  .play .gz-eyebrow{ animation: gz-fadeup .55s ease-out 1.15s forwards; }
+  .play .gz-h{      animation: gz-fadeup .55s ease-out 1.3s  forwards; }
+  .play .gz-sub{    animation: gz-fadeup .55s ease-out 1.45s forwards; }
+  .play .gz-replay{ animation: gz-fadeup .55s ease-out 1.75s forwards; }
+
+  @keyframes gz-rise{
+    to{ transform: translateY(0) rotate(0deg) scale(1.05); }
+  }
+  /* remate de presentación — conserva translateY(0)/scale para no saltar */
+  @keyframes gz-tilt{
+    0%,100%{ transform: translateY(0) rotate(0deg)    scale(1.05); }
+    30%    { transform: translateY(0) rotate(-1.6deg) scale(1.05); }
+    65%    { transform: translateY(0) rotate(.9deg)   scale(1.05); }
+  }
+  @keyframes gz-pop{ to{ opacity:1; transform:scale(1); } }
+  @keyframes gz-fadeup{ to{ opacity:1; transform:translateY(0); } }
+
+  /* estado final directo (reduced motion / fallback) */
+  .done .gz-photo{ transform: translateY(0) rotate(0) scale(1.05); }
+  .done .gz-spark, .done .gz-eyebrow, .done .gz-h, .done .gz-sub, .done .gz-replay{
+    opacity:1; transform:none;
+  }
+</style>
+</head>
+<body>
+
+<section class="gz-hero" id="gzHero">
+  <div class="gz-stage">
+    <!-- ⚠️ PRODUCCIÓN EN WIX: sube grattisimo-mani-cafe.jpg al Media Manager
+         y reemplaza el src de abajo por la URL que te dé Wix
+         (algo como https://static.wixstatic.com/media/xxxx.jpg) -->
+    <img class="gz-photo" src="grattisimo-mani-cafe.jpg"
+         alt="Mano sosteniendo paleta de maní con café de Grattisimo">
+
+    <span class="gz-spark s1" aria-hidden="true">✦</span>
+    <span class="gz-spark s2" aria-hidden="true">✦</span>
+  </div>
+
+  <div class="gz-copy">
+    <p class="gz-eyebrow">Grattisimo · Hecho natural</p>
+    <h2 class="gz-h">Maní con café</h2>
+    <p class="gz-sub">Cremoso e intenso, con ese toque que engancha desde la primera mordida.</p>
+    <button class="gz-replay" id="gzReplay" type="button">↺ Ver de nuevo</button>
+  </div>
+</section>
+
+<script>
+(function(){
+  var hero = document.getElementById('gzHero');
+  var played = false;
+
+  function play(){
+    if (played) return;
+    played = true;
+    hero.classList.add('play');
+  }
+
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  if (reduce) {
+    hero.classList.add('done');
+  } else if ('IntersectionObserver' in window) {
+    // root:null → dentro del iframe de Wix mide visibilidad real
+    // contra el viewport de la página padre (funciona cross-origin).
+    var io = new IntersectionObserver(function(entries){
+      for (var i = 0; i < entries.length; i++) {
+        if (entries[i].isIntersecting) { play(); io.disconnect(); break; }
+      }
+    }, { root: null, threshold: 0.35 });
+    io.observe(hero);
+  } else {
+    play();
+  }
+
+  document.getElementById('gzReplay').addEventListener('click', function(){
+    hero.classList.remove('play', 'done');
+    void hero.offsetWidth;
+    hero.classList.add('play');
+  });
+})();
+</script>
+</body>
+</html>

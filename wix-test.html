@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de página Wix — Grattisimo</title>
+<style>
+  body{ margin:0; font-family:system-ui,sans-serif; background:#fff; }
+  .spacer{
+    height:110vh; display:grid; place-items:center;
+    background:linear-gradient(#fafafa,#eee);
+    color:#888; font-size:20px; text-align:center;
+  }
+  .embed{
+    display:block; width:100%; max-width:480px;
+    margin:0 auto;
+    border:2px dashed #c9c9c9;
+  }
+  .label{ text-align:center; color:#aaa; font-size:12px; margin:8px 0; }
+</style>
+</head>
+<body>
+  <div class="spacer">⬇ scrollea — así se comporta la página de Wix<br>(los bloques animan al entrar en pantalla)</div>
+
+  <p class="label">— OPCIÓN A · página completa (grattisimo-completo.html, ~5300px) —</p>
+  <iframe class="embed" src="grattisimo-completo.html" title="embed completo" style="height:5300px"></iframe>
+
+  <div class="spacer">contenido de Wix entre bloques…</div>
+
+  <p class="label">— OPCIÓN B · embeds separados: la mano (640px) —</p>
+  <iframe class="embed" src="grattisimo-hand-foto.html" title="embed mano" style="height:640px"></iframe>
+
+  <div class="spacer">más contenido…</div>
+
+  <p class="label">— OPCIÓN B · embeds separados: visor Selección 2026 (660px) —</p>
+  <iframe class="embed" src="grattisimo-selector.html" title="embed selector" style="height:660px"></iframe>
+
+  <div class="spacer">fin de la página</div>
+</body>
+</html>

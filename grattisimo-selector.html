@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grattisimo — Selección 2026</title>
+<style>
+  /* ============ PALETA ============ */
+  :root{
+    --gz-teal:  #33BFA2;
+    --gz-green: #16382A;
+    --gz-bg:    #EFEBE4;
+    --gz-cream: #F3E3C8;
+    --gz-gray:  #4A5A50;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+  body{
+    background:var(--gz-bg);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+    color:var(--gz-green);
+    display:grid; place-items:center;
+    min-height:100vh;
+    overflow:hidden;
+  }
+
+  .gz-sel{ width:100%; max-width:440px; padding:14px 0 18px; text-align:center; }
+
+  .gz-eyebrow{
+    font-size:11px; letter-spacing:.16em; text-transform:uppercase; font-weight:600;
+    color:var(--gz-gray);
+    opacity:0; transform:translateY(16px);
+  }
+  .gz-h{
+    font-size:clamp(24px, 6.5vw, 32px);
+    font-weight:700; letter-spacing:-.02em; line-height:1.1;
+    margin:4px 0 14px;
+    opacity:0; transform:translateY(16px);
+  }
+
+  /* ============ SLIDER (estilo Apple: peek lateral + escala continua) ============ */
+  .gz-viewport{
+    position:relative;
+    width:min(92vw, 400px);
+    aspect-ratio: 1/1;
+    margin:0 auto;
+    overflow:hidden;
+    cursor:grab;
+    touch-action: pan-y;
+    user-select:none;
+    -webkit-user-select:none;
+    opacity:0; transform:translateY(16px);
+  }
+  .gz-viewport.grabbing{ cursor:grabbing; }
+
+  .gz-track{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    height:100%;
+    will-change:transform;
+  }
+  /* espaciadores para centrar la primera/última tarjeta
+     (el gap ya aporta 14px, se descuentan) */
+  .gz-track::before,
+  .gz-track::after{
+    content:'';
+    flex:0 0 calc(12% - 14px);
+  }
+  .gz-card{
+    flex:0 0 76%;
+    aspect-ratio: 4/5;
+    border-radius:24px;
+    background-image:url('grattisimo-sel-sprite.jpg'); /* ⚠️ PRODUCCIÓN: URL de Wix Media */
+    background-size:100% 600%;
+    box-shadow:0 14px 34px rgba(22,56,42,.16);
+    will-change:transform, opacity;
+  }
+  .gz-card.f1{ background-position:0 0%;   }
+  .gz-card.f2{ background-position:0 20%;  }
+  .gz-card.f3{ background-position:0 40%;  }
+  .gz-card.f4{ background-position:0 60%;  }
+  .gz-card.f5{ background-position:0 80%;  }
+  .gz-card.f6{ background-position:0 100%; }
+
+  /* ============ ETIQUETA + CONTROLES (fila estilo Apple) ============ */
+  .gz-label{
+    margin-top:16px; min-height:40px;
+    font-size:16px; font-weight:600; letter-spacing:-.01em;
+    opacity:0; transform:translateY(16px);
+  }
+  .gz-label small{
+    display:block; font-size:12px; font-weight:500;
+    color:var(--gz-gray); margin-top:2px;
+  }
+
+  .gz-controls{
+    display:flex; align-items:center; justify-content:space-between;
+    width:min(92vw, 400px);
+    margin:10px auto 0;
+    padding:0 6px;
+    opacity:0; transform:translateY(16px);
+  }
+  .gz-dots{ display:flex; gap:7px; }
+  .gz-dot{
+    width:8px; height:8px; border-radius:50%;
+    border:none; padding:0; cursor:pointer;
+    background:rgba(22,56,42,.22);
+    transition:background .3s, transform .3s;
+  }
+  .gz-dot.on{ background:var(--gz-green); transform:scale(1.2); }
+
+  .gz-arrows{ display:flex; gap:10px; }
+  .gz-arrow{
+    width:36px; height:36px; border-radius:50%;
+    border:none; cursor:pointer;
+    background:rgba(22,56,42,.09);
+    color:var(--gz-green);
+    display:grid; place-items:center;
+    transition:background .25s, opacity .25s;
+  }
+  .gz-arrow:hover{ background:rgba(22,56,42,.2); }
+  .gz-arrow:disabled{ opacity:.35; cursor:default; }
+  .gz-arrow svg{ display:block; }
+
+  /* ============ INTRO (una vez, al entrar al viewport del padre) ============ */
+  .play .gz-eyebrow { animation: gz-in .6s cubic-bezier(.32,.72,0,1) .05s forwards; }
+  .play .gz-h      { animation: gz-in .6s cubic-bezier(.32,.72,0,1) .12s forwards; }
+  .play .gz-viewport{ animation: gz-in .7s cubic-bezier(.32,.72,0,1) .2s forwards; }
+  .play .gz-label  { animation: gz-in .6s cubic-bezier(.32,.72,0,1) .38s forwards; }
+  .play .gz-controls{ animation: gz-in .6s cubic-bezier(.32,.72,0,1) .46s forwards; }
+  @keyframes gz-in{ to{ opacity:1; transform:translateY(0); } }
+
+  .done .gz-eyebrow,.done .gz-h,.done .gz-viewport,.done .gz-label,.done .gz-controls{
+    opacity:1; transform:translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<section class="gz-sel" id="gzSel">
+  <p class="gz-eyebrow">Grattisimo · Selección 2026</p>
+  <h2 class="gz-h">Elige a tu titular</h2>
+
+  <div class="gz-viewport" id="gzVp">
+    <div class="gz-track" id="gzTrack">
+      <div class="gz-card f1"></div>
+      <div class="gz-card f2"></div>
+      <div class="gz-card f3"></div>
+      <div class="gz-card f4"></div>
+      <div class="gz-card f5"></div>
+      <div class="gz-card f6"></div>
+    </div>
+  </div>
+
+  <p class="gz-label" id="gzLabel"></p>
+
+  <div class="gz-controls">
+    <div class="gz-dots" id="gzDots"></div>
+    <div class="gz-arrows">
+      <button class="gz-arrow" id="gzPrev" type="button" aria-label="Anterior">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M9 2L4.5 7L9 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <button class="gz-arrow" id="gzNext" type="button" aria-label="Siguiente">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M5 2L9.5 7L5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+<script>
+(function(){
+  var SABORES = [
+    ['Maracuyá', 'Light · sin azúcar'],
+    ['Mango Chamoy', 'Fruta · 100% natural'],
+    ['Carbón Activado', 'Cremoso'],
+    ['Coctél de Frutas', 'Light · sin azúcar'],
+    ['Tamarindo Tajín', 'Fruta · 100% natural'],
+    ['Taro', 'Cremoso']
+  ];
+  var N = SABORES.length;
+
+  var sel   = document.getElementById('gzSel');
+  var vp    = document.getElementById('gzVp');
+  var track = document.getElementById('gzTrack');
+  var label = document.getElementById('gzLabel');
+  var dots  = document.getElementById('gzDots');
+  var prev  = document.getElementById('gzPrev');
+  var next  = document.getElementById('gzNext');
+  var cards = track.children;
+
+  var idx = 0, x = 0;
+  var dragging = false, startX = 0, baseX = 0, lastX = 0, lastT = 0, vel = 0;
+  var rafId = null;
+
+  for (var i = 0; i < N; i++){
+    var d = document.createElement('button');
+    d.className = 'gz-dot';
+    d.type = 'button';
+    d.setAttribute('aria-label', SABORES[i][0]);
+    (function(i){ d.addEventListener('click', function(){ goTo(i); }); })(i);
+    dots.appendChild(d);
+  }
+
+  function step(){ return cards[0].offsetWidth + 14; }        // ancho tarjeta + gap
+  function minX(){ return -(N - 1) * step(); }
+
+  /* render continuo: posición del track + escala/opacidad por distancia al centro
+     (el tratamiento de profundidad de los sliders de Apple) */
+  function render(){
+    track.style.transform = 'translate3d(' + x + 'px,0,0)';
+    var vw = vp.clientWidth;
+    for (var i = 0; i < N; i++){
+      var r = cards[i].getBoundingClientRect();
+      var vr = vp.getBoundingClientRect();
+      var d = Math.abs((r.left + r.width/2) - (vr.left + vw/2)) / step();
+      d = Math.min(d, 1.4);
+      cards[i].style.transform = 'scale(' + (1 - .085 * d) + ')';
+      cards[i].style.opacity  = 1 - .4 * d;
+    }
+  }
+
+  function updateUI(){
+    label.innerHTML = '<strong>' + SABORES[idx][0] + '</strong><small>' + SABORES[idx][1] + '</small>';
+    for (var i = 0; i < N; i++) dots.children[i].classList.toggle('on', i === idx);
+    prev.disabled = idx === 0;
+    next.disabled = idx === N - 1;
+  }
+
+  /* snap con curva estilo iOS (ease-out marcado, asentado largo) */
+  function animateTo(target){
+    if (rafId) cancelAnimationFrame(rafId);
+    var from = x, t0 = performance.now(), D = 620;
+    function frame(now){
+      var u = Math.min(1, (now - t0) / D);
+      var e = 1 - Math.pow(1 - u, 3.2);
+      x = from + (target - from) * e;
+      render();
+      if (u < 1) rafId = requestAnimationFrame(frame);
+      else rafId = null;
+    }
+    rafId = requestAnimationFrame(frame);
+  }
+
+  function goTo(i){
+    idx = Math.max(0, Math.min(N - 1, i));
+    animateTo(-idx * step());
+    updateUI();
+  }
+
+  /* ---- drag / swipe ---- */
+  vp.addEventListener('pointerdown', function(e){
+    dragging = true;
+    vp.classList.add('grabbing');
+    vp.setPointerCapture(e.pointerId);
+    if (rafId){ cancelAnimationFrame(rafId); rafId = null; }
+    startX = lastX = e.clientX;
+    baseX = x;
+    lastT = performance.now();
+    vel = 0;
+  });
+
+  vp.addEventListener('pointermove', function(e){
+    if (!dragging) return;
+    var now = performance.now();
+    var raw = baseX + (e.clientX - startX);
+
+    // resistencia en los extremos
+    if (raw > 0)      raw *= .3;
+    if (raw < minX()) raw = minX() + (raw - minX()) * .3;
+    x = raw;
+
+    var dt = Math.max(1, now - lastT);
+    vel = .8 * vel + .2 * ((e.clientX - lastX) / dt);
+    lastX = e.clientX; lastT = now;
+
+    render();
+  });
+
+  function release(){
+    if (!dragging) return;
+    dragging = false;
+    vp.classList.remove('grabbing');
+    // máximo ±1 tarjeta por gesto: flick veloz o arrastre >25% del paso
+    var dx = x - (-idx * step());
+    var dir = 0;
+    if (Math.abs(vel) > 0.4)              dir = vel < 0 ? 1 : -1;
+    else if (Math.abs(dx) > step() * .25) dir = dx  < 0 ? 1 : -1;
+    goTo(idx + dir);
+  }
+  vp.addEventListener('pointerup', release);
+  vp.addEventListener('pointercancel', release);
+
+  prev.addEventListener('click', function(){ goTo(idx - 1); });
+  next.addEventListener('click', function(){ goTo(idx + 1); });
+
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowLeft')  goTo(idx - 1);
+    if (e.key === 'ArrowRight') goTo(idx + 1);
+  });
+
+  window.addEventListener('resize', function(){ x = -idx * step(); render(); });
+
+  /* ---- intro: una sola vez al entrar al viewport del padre ---- */
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce){
+    sel.classList.add('done');
+  } else if ('IntersectionObserver' in window){
+    var played = false;
+    var io = new IntersectionObserver(function(entries){
+      for (var i = 0; i < entries.length; i++){
+        if (entries[i].isIntersecting && !played){
+          played = true;
+          sel.classList.add('play');
+          io.disconnect();
+          break;
+        }
+      }
+    }, { root:null, threshold:0.35 });
+    io.observe(sel);
+  } else {
+    sel.classList.add('done');
+  }
+
+  updateUI();
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grattisimo · Variantes de portada</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --verde:#014638; --menta:#6CC1B0; --menta-p:#97CFC1;
+    --rosa:#FFA9C6; --rosa-ch:#F279A1; --rosa-p:#FFCAD5;
+    --cobre:#DB9677; --crema:#EFEBE4; --tinta:#0A2E27;
+    --ease:cubic-bezier(.23,1,.32,1);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Montserrat',system-ui,sans-serif;color:var(--tinta);background:#fff;-webkit-font-smoothing:antialiased}
+  img,svg{display:block;max-width:100%}
+
+  /* etiqueta de cada variante */
+  .lab{
+    position:sticky; top:0; z-index:30;
+    background:var(--verde); color:var(--menta-p);
+    padding:9px 18px; font-size:11px; font-weight:700;
+    letter-spacing:.16em; text-transform:uppercase;
+    display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+  }
+  .lab b{color:#fff}
+  .lab span{opacity:.75;letter-spacing:.04em;text-transform:none;font-weight:500;font-size:11.5px}
+
+  /* ====================== A · AMORINO ====================== */
+  .A{
+    background:var(--crema); position:relative; overflow:hidden;
+    min-height:100svh; display:grid; align-content:center; justify-items:center;
+    padding:40px 20px 60px; text-align:center;
+  }
+  /* texto curvo sobre arco — el recurso distintivo de Amorino (SVG textPath) */
+  .A .arco{ width:min(92vw,760px); margin-bottom:-6vh; }
+  .A .arco text{
+    font-family:'Montserrat',sans-serif; font-size:23px; font-weight:700;
+    letter-spacing:.22em; fill:var(--cobre); text-transform:uppercase;
+  }
+  .A .paleta{
+    width:min(46vw,290px); filter:drop-shadow(0 30px 34px rgba(1,70,56,.28));
+    animation:flota 5s ease-in-out infinite;
+  }
+  @keyframes flota{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-14px) rotate(1.5deg)}}
+  .A .logo{ width:min(72vw,380px); margin-top:6px; }
+  .A .claim{
+    font-size:clamp(15px,2.2vw,19px); font-weight:300; color:#4A5A50;
+    max-width:44ch; margin:16px auto 0; line-height:1.6;
+  }
+  .A .claim b{font-weight:700;color:var(--verde)}
+  /* halo de color detrás de la paleta */
+  .A::before{
+    content:''; position:absolute; left:50%; top:46%; transform:translate(-50%,-50%);
+    width:min(70vw,520px); aspect-ratio:1; border-radius:50%;
+    background:radial-gradient(circle, rgba(151,207,193,.55), transparent 68%);
+    pointer-events:none;
+  }
+
+  /* marquee (el ticker de Amorino) */
+  .marq{ background:var(--verde); overflow:hidden; padding:13px 0; }
+  .marq-in{ display:flex; gap:34px; width:max-content; animation:corre 26s linear infinite; }
+  .marq span{
+    color:var(--menta-p); font-size:12.5px; font-weight:700;
+    letter-spacing:.2em; text-transform:uppercase; white-space:nowrap;
+  }
+  .marq span i{color:var(--rosa);font-style:normal}
+  @keyframes corre{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* ====================== B · SALT & STRAW ====================== */
+  .B{ background:#fff; padding:44px 0 60px; }
+  .B .cab{ max-width:1120px; margin:0 auto 26px; padding:0 22px; }
+  .B h2{
+    font-size:clamp(34px,6vw,58px); font-weight:800; letter-spacing:-.03em;
+    line-height:1.02; color:var(--verde); max-width:14ch;
+  }
+  .B h2 em{font-style:normal;color:var(--rosa-ch)}
+  .B .sub{font-size:15px;color:#4A5A50;margin-top:12px;max-width:52ch;font-weight:400}
+  .B .tira{
+    display:flex; gap:16px; overflow-x:auto; padding:6px 22px 18px;
+    scroll-snap-type:x mandatory; scrollbar-width:none;
+  }
+  .B .tira::-webkit-scrollbar{display:none}
+  .B .card{
+    flex:0 0 clamp(228px,26vw,272px); scroll-snap-align:start;
+    background:var(--crema); border-radius:22px; padding:18px 18px 20px;
+    display:flex; flex-direction:column;
+    transition:transform 200ms var(--ease), box-shadow 200ms var(--ease);
+  }
+  @media(hover:hover) and (pointer:fine){
+    .B .card:hover{transform:translateY(-6px);box-shadow:0 20px 38px rgba(1,70,56,.14)}
+  }
+  .B .card:active{transform:scale(.98)}
+  .B .foto{ aspect-ratio:1/1; display:grid; place-items:center; margin-bottom:12px; }
+  .B .foto img{ max-height:100%; width:auto; filter:drop-shadow(0 14px 16px rgba(1,70,56,.20)); }
+  .B .card h3{font-size:17px;font-weight:800;color:var(--verde);letter-spacing:-.01em}
+  .B .card .desc{font-size:12.8px;line-height:1.55;color:#4A5A50;margin:7px 0 14px;flex:1}
+  .B .tag{
+    display:inline-block;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--cobre);margin-bottom:6px;
+  }
+  .B .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    background:var(--verde);color:var(--menta-p);text-decoration:none;
+    font-size:13px;font-weight:700;padding:11px 16px;border-radius:999px;
+    transition:transform 150ms var(--ease),background 200ms;
+  }
+  .B .btn:active{transform:scale(.96)}
+  @media(hover:hover) and (pointer:fine){ .B .btn:hover{background:var(--rosa-ch);color:#fff} }
+
+  /* ====================== C · HÍBRIDO ====================== */
+  .C{
+    background:var(--verde); color:#fff; position:relative; overflow:hidden;
+    min-height:100svh; display:grid; align-content:center;
+    padding:50px 22px 60px;
+  }
+  .C .in{ max-width:1120px; margin:0 auto; display:grid; gap:34px; align-items:center; }
+  @media(min-width:880px){ .C .in{grid-template-columns:1.05fr .95fr} }
+  .C .eyebrow{
+    font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--cobre);
+  }
+  .C h2{
+    font-size:clamp(38px,7vw,74px); font-weight:900; line-height:.98;
+    letter-spacing:-.035em; margin:14px 0 0; color:#fff;
+  }
+  .C h2 em{font-style:normal;color:var(--rosa)}
+  .C h2 i{font-style:normal;color:var(--menta)}
+  .C p{font-size:clamp(14.5px,1.7vw,17px);font-weight:300;color:var(--menta-p);margin-top:18px;max-width:46ch;line-height:1.6}
+  .C .ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
+  .C .b1,.C .b2{
+    text-decoration:none;font-weight:700;font-size:14.5px;padding:14px 24px;border-radius:999px;
+    transition:transform 150ms var(--ease);
+  }
+  .C .b1{background:var(--rosa-ch);color:#fff}
+  .C .b2{background:transparent;color:var(--menta-p);border:2px solid rgba(151,207,193,.45)}
+  .C .b1:active,.C .b2:active{transform:scale(.96)}
+  .C .escena{position:relative;display:grid;place-items:center;min-height:46vh}
+  .C .escena::before{
+    content:'';position:absolute;width:min(80%,420px);aspect-ratio:1;border-radius:50%;
+    background:radial-gradient(circle,rgba(108,193,176,.32),transparent 66%);
+  }
+  .C .escena img{
+    position:relative;width:min(52vw,300px);
+    filter:drop-shadow(0 34px 38px rgba(0,0,0,.42));
+    animation:flota 5.5s ease-in-out infinite;
+  }
+  .C .mini{
+    position:absolute;width:min(20vw,110px);opacity:.95;
+    filter:drop-shadow(0 18px 22px rgba(0,0,0,.4));
+  }
+  .C .mini.a{left:2%;top:8%;animation:flota 6.5s ease-in-out infinite}
+  .C .mini.b{right:0;bottom:6%;animation:flota 7.5s ease-in-out .8s infinite}
+
+  .nota{max-width:900px;margin:0 auto;padding:26px 22px 60px;font-size:12.5px;line-height:1.7;color:#4A5A50}
+  .nota b{color:var(--verde)}
+  .nota code{background:#EAF3EF;padding:1px 6px;border-radius:5px}
+</style>
+</head>
+<body>
+
+<!-- ============================= A ============================= -->
+<div class="lab"><b>Variante A</b> · base Amorino <span>campo cálido · texto curvo en arco · producto flotando · marquee</span></div>
+<section class="A">
+  <svg class="arco" viewBox="0 0 800 190" aria-hidden="true">
+    <defs><path id="arco1" d="M 30 175 Q 400 15 770 175" fill="none"/></defs>
+    <text><textPath href="#arco1" startOffset="50%" text-anchor="middle">Trozos de fruta · 0% culpa · 100% natural</textPath></text>
+  </svg>
+  <img class="paleta" src="helados/maracuya.png" alt="Paleta de maracuyá Grattisimo">
+  <img class="logo" src="logo-verde.png" alt="Grattisimo — tu sabor, tu salud">
+  <p class="claim">Helados artesanales a base de <b>fruta real</b>, bajos en calorías y azúcares.
+    El postre que sí puedes comer todos los días.</p>
+</section>
+<div class="marq">
+  <div class="marq-in" id="marq"></div>
+</div>
+
+<!-- ============================= B ============================= -->
+<div class="lab"><b>Variante B</b> · base Salt &amp; Straw <span>producto al frente · fichas con descripción apetitosa · CTA por sabor</span></div>
+<section class="B">
+  <div class="cab">
+    <h2>Los que <em>siempre</em> se acaban primero.</h2>
+    <p class="sub">Fruta natural en trozos, con y sin azúcar. Elige el tuyo y pídelo por WhatsApp.</p>
+  </div>
+  <div class="tira" id="tira"></div>
+</section>
+
+<!-- ============================= C ============================= -->
+<div class="lab"><b>Variante C</b> · híbrido <span>campo verde de marca · titular gigante · producto + CTA comercial</span></div>
+<section class="C">
+  <div class="in">
+    <div>
+      <p class="eyebrow">Helados naturales · Guatemala</p>
+      <h2>El postre que cuida <em>tu sabor</em><br>y <i>tu salud</i>.</h2>
+      <p>Hechos con fruta real, bajos en calorías y azúcares. Con y sin azúcar,
+        con y sin leche. 100% delicioso, 0% culpa.</p>
+      <div class="ctas">
+        <a class="b1" href="#">Pedir por WhatsApp</a>
+        <a class="b2" href="#">Ver los sabores</a>
+      </div>
+    </div>
+    <div class="escena">
+      <img class="mini a" src="helados/fresa.png" alt="">
+      <img src="helados/mango-chamoy.png" alt="Paleta de mango con chamoy Grattisimo">
+      <img class="mini b" src="helados/mora.png" alt="">
+    </div>
+  </div>
+</section>
+
+<p class="nota">
+  <b>Qué tomé de cada referencia.</b><br>
+  · <b>Amorino</b> (A): campo de color cálido a pantalla completa, producto flotando como héroe,
+  <b>texto curvo sobre un arco</b> —su recurso más distintivo, hecho con <code>SVG textPath</code>—
+  y el <b>marquee</b> de sabores. Su hero es un color sólido (<code>#E9BC96</code>) muy cercano a tu crema.<br>
+  · <b>Salt &amp; Straw</b> (B): abren <b>directo con producto</b>, sin portada de marca. Fichas con
+  descripción que da hambre y llamado a la acción por sabor. Tipografía grande sin mayúsculas.<br>
+  · <b>Híbrido</b> (C): tu verde de marca como campo, titular gigante en Montserrat 900 y producto
+  con acompañantes, más los dos CTA comerciales.<br><br>
+  <b>Nota de marca:</b> Amorino usa una serif de display; tu manual pide <b>Montserrat exclusivamente</b>,
+  así que el impacto se logra con el peso <b>900</b> en tamaños grandes. Las descripciones de la B son
+  <b>propuesta de copy mía</b> — hay que aprobarlas.
+</p>
+
+<script>
+(function(){
+  /* marquee: se duplica la lista para que el bucle sea continuo */
+  var items=['Trozos de fruta','0% culpa','100% natural','Con y sin azúcar','Apto para diabéticos','Con y sin leche','De agua y cremosos','+30 sabores'];
+  var m=document.getElementById('marq');
+  var html=items.map(function(t){return '<span>'+t+' <i>·</i></span>'}).join('');
+  m.innerHTML=html+html;
+
+  /* fichas estilo Salt & Straw — copy propuesto, pendiente de aprobar */
+  var S=[
+    ['maracuya','Maracuyá','Light · sin azúcar','Ácido, intenso y refrescante. El que pides cuando hace calor de verdad.'],
+    ['mango-chamoy','Mango con Chamoy','Fruta · con chamoy','Dulce y picante a la vez. Mango natural con ese toque de chamoy que engancha.'],
+    ['mania-cafe','Maní con Café','Cremoso','Cremoso e intenso, con ese toque de café que lo vuelve adictivo.'],
+    ['fresa','Fresa','Fruta natural','Fresa de verdad, con trozos. Simple, y por eso nunca falla.'],
+    ['coco','Coco','Cremoso','Hecho con leche de coco. Suave, tropical y sin culpa.'],
+    ['carbon-activado','Carbón Activado','Cremoso · edición','El más llamativo del mostrador. Negro intenso y sabor suave.']
+  ];
+  document.getElementById('tira').innerHTML=S.map(function(s){
+    return '<article class="card">'
+      +'<div class="foto"><img src="helados/'+s[0]+'.png" alt="Helado de '+s[1]+'" loading="lazy"></div>'
+      +'<span class="tag">'+s[2]+'</span>'
+      +'<h3>'+s[1]+'</h3>'
+      +'<p class="desc">'+s[3]+'</p>'
+      +'<a class="btn" href="#">Pedir 🍦</a>'
+      +'</article>';
+  }).join('');
+})();
+</script>
+</body>
+</html>

@@ -74,47 +74,6 @@
     padding:9px 15px; border-radius:999px;
   }
 
-  /* ================= SECCIÓN 0 · MÁSCARA DE APERTURA =================
-     El video entra a pantalla completa y la capa verde se cierra hasta
-     posarse en el logo (el reverso del efecto de Apple). El video nunca
-     se toca: solo escala la capa, así que todo corre en GPU.
-     Los clips se encadenan con fundido; en teléfono se sirve el reel
-     vertical porque un 16:9 con cover solo mostraría el 26% de su ancho. */
-  .gzmx-wrap{ position:relative; height:340vh; }
-  .gzmx-stage{
-    position:sticky; top:0; overflow:hidden; background:var(--gz-green);
-    height:100vh; height:100svh;   /* svh: sin salto por la barra del navegador */
-  }
-  .gzmx-video{
-    position:absolute; inset:0; width:100%; height:100%;
-    object-fit:cover; display:block;
-    opacity:0; transition:opacity 600ms ease;
-  }
-  .gzmx-video.on{ opacity:1; }
-  .gzmx-mask{
-    position:absolute; inset:0;
-    background:var(--gz-green);
-    -webkit-mask-image:url('logo-verde.png'), linear-gradient(#000,#000);
-            mask-image:url('logo-verde.png'), linear-gradient(#000,#000);
-    -webkit-mask-size:var(--gzmx-logo, 420px) auto, 100% 100%;
-            mask-size:var(--gzmx-logo, 420px) auto, 100% 100%;
-    -webkit-mask-repeat:no-repeat, no-repeat;
-            mask-repeat:no-repeat, no-repeat;
-    -webkit-mask-position:center, center;
-            mask-position:center, center;
-    -webkit-mask-composite:xor;      /* Safari */
-            mask-composite:exclude;  /* estándar */
-    transform-origin:center center;
-    will-change:transform;
-  }
-  .gzmx-pista{
-    position:absolute; left:0; right:0; bottom:26px; z-index:4; text-align:center;
-    font-size:10.5px; font-weight:700; letter-spacing:.2em; text-transform:uppercase;
-    color:var(--gz-menta-p); opacity:0; pointer-events:none;
-    animation: gzmx-hint 2.6s ease-in-out 1.2s infinite;
-  }
-  @keyframes gzmx-hint{ 0%,100%{opacity:0; transform:translateY(0)} 50%{opacity:.75; transform:translateY(5px)} }
-
   /* ================= SECCIÓN 1 · PORTADA =================
      Logo oficial + abanico de 3 tarjetas con los videos y fotos
      REALES de grattisimo.com (CDN de Wix, URLs permanentes):
@@ -191,6 +150,36 @@
   .gz-top.play .gz-eyebrow{ animation: gz-fadeup .55s ease-out .55s forwards; }
   .gz-top.play .gz-sub{     animation: gz-fadeup .55s ease-out .7s  forwards; }
   .gz-top.done .gz-spark, .gz-top.done .gz-eyebrow, .gz-top.done .gz-sub{ opacity:1; transform:none; }
+
+  /* CTA de la portada — mismo lenguaje visual que el CTA final de la página.
+     El sitio original abre con "¡HAZ TU PEDIDO POR WHATSAPP!"; aquí se usa
+     el Rosa Chicle oficial en vez del verde de WhatsApp para no salir de paleta. */
+  .gz-top-ctas{
+    display:flex; gap:12px; flex-wrap:wrap; justify-content:center;
+    margin-top:22px;
+    opacity:0; transform:translateY(14px);
+  }
+  .gz-top-ctas a{
+    display:inline-block; text-decoration:none;
+    font-weight:700; font-size:14.5px; letter-spacing:.03em;
+    padding:15px 26px; border-radius:999px;
+    transition:transform .25s cubic-bezier(.23,1,.32,1), box-shadow .25s, background .2s, color .2s;
+  }
+  .gz-top-ctas .pri{
+    background:var(--gz-rosa-ch); color:#fff;
+    box-shadow:0 12px 26px rgba(242,121,161,.42);
+  }
+  .gz-top-ctas .sec{
+    background:transparent; color:var(--gz-green);
+    border:2px solid rgba(1,70,56,.28);
+  }
+  @media (hover:hover) and (pointer:fine){
+    .gz-top-ctas .pri:hover{ transform:translateY(-2px); box-shadow:0 16px 32px rgba(242,121,161,.52); }
+    .gz-top-ctas .sec:hover{ background:var(--gz-green); color:var(--gz-menta-p); border-color:var(--gz-green); }
+  }
+  .gz-top-ctas a:active{ transform:scale(.96); }
+  .gz-top.play .gz-top-ctas{ animation: gz-fadeup .55s ease-out .85s forwards; }
+  .gz-top.done .gz-top-ctas{ opacity:1; transform:none; }
 
   /* ================= SECCIÓN 3 · LA MANO ================= */
   .gz-hero{
@@ -441,6 +430,37 @@
     }
     .gz-item:hover img{ transform:rotate(-4deg) scale(1.06) translateY(-2px); }
   }
+  /* --- LA MORDIDA (Piña Pepita) ---
+     Una máscara CSS solo recorta formas geométricas, y un círculo perfecto
+     nunca parece mordisco. Así que la versión mordida es una IMAGEN real
+     (<sabor>-mordido-N.png): arco festoneado con marcas de dientes y borde
+     irregular, generado restándole la mordida al canal alfa del PNG.
+     Hay 4 variantes por sabor y el JS sortea una en cada carga.
+     Las dos fotos se apilan en la misma celda y se cruzan con --mordida (0→1). */
+  .gz-item-img > img{ grid-area:1/1; }        /* entera y mordida, misma celda */
+  /* especificidad (0,2,1): debe ganarle a `.gz-item img`, que si no
+     sobrescribe la transición y el cruce saldría instantáneo */
+  .gz-item img.gz-entero, .gz-item img.gz-mordido{
+    transition:opacity 240ms cubic-bezier(.23,1,.32,1),
+               transform 250ms cubic-bezier(.23,1,.32,1);
+  }
+  /* un solo mando para las dos fotos: 0 = entera · 1 = mordida */
+  .gz-item img.gz-mordido{ opacity:var(--mordida, 0); }
+  .gz-item img.gz-entero { opacity:calc(1 - var(--mordida, 0)); }
+
+  /* Escritorio: se muerde al pasar el mouse */
+  @media (hover:hover) and (pointer:fine){
+    .gz-item:hover{ --mordida:1; }
+  }
+  /* Celular: al deslizar, el JS sube --mordida conforme el helado se acerca
+     al centro de la tira. Sin transición de opacidad para que siga al dedo
+     exactamente: los 240ms se sentirían como lag. */
+  .gz-flav.gz-desliza .gz-item img.gz-entero,
+  .gz-flav.gz-desliza .gz-item img.gz-mordido{ transition:transform 250ms cubic-bezier(.23,1,.32,1); }
+  /* feedback inmediato al presionar */
+  .gz-item:active{ --mordida:1; }
+  .gz-item-img{ position:relative; }
+
   /* squish al presionar (también en táctil): respuesta rápida al apretar,
      retorno con los 200/250ms normales al soltar */
   .gz-item:active .gz-item-img{ transform:scale(.97); transition-duration:120ms; }
@@ -609,16 +629,6 @@
   </nav>
 </header>
 
-<!-- ============ SECCIÓN 0 · MÁSCARA DE APERTURA (el video se cierra en el logo) ============ -->
-<div class="gzmx-wrap" id="gzmxWrap">
-  <div class="gzmx-stage">
-    <video class="gzmx-video" id="gzmxA" muted playsinline preload="auto" aria-hidden="true"></video>
-    <video class="gzmx-video" id="gzmxB" muted playsinline preload="auto" aria-hidden="true"></video>
-    <div class="gzmx-mask" id="gzmxMask" role="img" aria-label="Logo de Grattisimo revelándose sobre videos de sus helados naturales"></div>
-    <p class="gzmx-pista">Baja ↓</p>
-  </div>
-</div>
-
 <!-- ============ SECCIÓN 1 · PORTADA (logo + media real de grattisimo.com) ============ -->
 <section class="gz-top" id="gzTop">
   <h1 class="gz-brand">
@@ -652,6 +662,13 @@
   <p class="gz-eyebrow">Helados de fruta 100% natural</p>
   <p class="gz-sub">Bajos en calorías y azúcares —
     <strong>100% delicioso, 0% culpa.</strong></p>
+
+  <!-- CTA principal: mismo mensaje con el que abre grattisimo.com -->
+  <div class="gz-top-ctas">
+    <a class="pri" href="https://wa.me/50255740469?text=%C2%A1Hola%21%20Quiero%20hacer%20un%20pedido%20%F0%9F%8D%A6"
+       target="_blank" rel="noopener">¡Haz tu pedido por WhatsApp!</a>
+    <a class="sec" href="#gzMenu">Ver los sabores</a>
+  </div>
 </section>
 
 <!-- ============ SECCIÓN 2 · PALETA 3D (tu sabor / tu salud) ============ -->
@@ -1112,20 +1129,89 @@
     ['Almendra',     'almendra']
   ];
 
+  /* variantes de mordida por sabor (helados/<slug>-mordido-N.png).
+     Debe coincidir con VARIANTES en gen-mordidas.py */
+  var VARIANTES_MORDIDA = 4;
+  /* sabores con foto mordida generada */
+  var CON_MORDIDA = [
+    'almendra', 'carbon-activado', 'cereza', 'chocolate',
+    'coco', 'coctel-frutas', 'fresa', 'guanabana',
+    'mango', 'mango-chamoy', 'mania', 'mania-cafe',
+    'maracuya', 'mora', 'mora-cremosa', 'naranja-pepita',
+    'nutella', 'oreo', 'pina-pepita', 'tamarindo-tajin'
+  ];
+
   function renderSabores(id, data){
     var box = document.getElementById(id);
     data.forEach(function(s, i){
       var f = document.createElement('figure');
       f.className = 'gz-item gz-r';
+      f.dataset.sabor = s[1];        /* permite efectos por sabor (ej. la mordida) */
       f.style.transitionDelay = Math.min(i * 45, 400) + 'ms';
+      /* sabores con versión mordida (imagen real, no máscara CSS).
+         Hay VARIANTES_MORDIDA por sabor, cada una mordida en otra esquina;
+         se sortea en cada carga para que la mordida no sea siempre la misma. */
+      var muerde = CON_MORDIDA.indexOf(s[1]) > -1;
+      var v = 1 + Math.floor(Math.random() * VARIANTES_MORDIDA);
+      if (muerde) f.setAttribute('data-muerde', '');
       f.innerHTML =
-        '<div class="gz-item-img"><img loading="lazy" src="helados/' + s[1] + '.png" alt="Helado de ' + s[0] + '"></div>' +
+        '<div class="gz-item-img">' +
+          '<img class="gz-entero" loading="lazy" src="helados/' + s[1] + '.png" alt="Helado de ' + s[0] + '">' +
+          (muerde ? '<img class="gz-mordido" loading="lazy" src="helados/' + s[1] + '-mordido-' + v + '.png" alt="" aria-hidden="true">' : '') +
+        '</div>' +
         '<figcaption>' + s[0] + '</figcaption>';
       box.appendChild(f);
     });
   }
+  /* --- Morder al deslizar (celular) ---
+     En táctil no hay hover, así que el propio gesto revela el efecto: el
+     helado se va mordiendo conforme se acerca al centro de la tira y se
+     recompone al alejarse. Solo se activa si la tira realmente desliza
+     (en el grid de escritorio manda el hover y esto se apaga).
+     Las posiciones se miden UNA vez, no en cada frame → sin layout thrashing. */
+  function mordidaAlDeslizar(id){
+    if (reduce) return;
+    var box = document.getElementById(id);
+    if (!box) return;
+    var items = [].slice.call(box.querySelectorAll('.gz-item[data-muerde]'));
+    if (!items.length) return;
+    var centros = [], activo = false, ticking = false;
+
+    function limpiar(){
+      box.classList.remove('gz-desliza');
+      items.forEach(function(it){ it.style.removeProperty('--mordida'); });
+    }
+    function pintar(){
+      var c = box.scrollLeft + box.clientWidth / 2;
+      var rango = box.clientWidth * 0.30;      /* qué tan cerca del centro empieza */
+      for (var i = 0; i < items.length; i++){
+        var d = Math.abs(centros[i] - c) / rango;
+        var v = Math.max(0, Math.min(1, 1 - d));
+        v = v * v * (3 - 2 * v);               /* smoothstep: entra y sale suave */
+        items[i].style.setProperty('--mordida', v.toFixed(3));
+      }
+      ticking = false;
+    }
+    function medir(){
+      activo = box.scrollWidth > box.clientWidth + 4;
+      if (!activo){ limpiar(); return; }
+      box.classList.add('gz-desliza');
+      centros = items.map(function(it){ return it.offsetLeft + it.offsetWidth / 2; });
+      pintar();
+    }
+    box.addEventListener('scroll', function(){
+      if (!activo || ticking) return;
+      ticking = true;
+      requestAnimationFrame(pintar);
+    }, { passive:true });
+    window.addEventListener('resize', medir);
+    medir();
+  }
+
   renderSabores('gzFruta', FRUTA);
   renderSabores('gzCremosos', CREMOSOS);
+  mordidaAlDeslizar('gzFruta');
+  mordidaAlDeslizar('gzCremosos');
 
   /* 11 tiendas con link directo a su menú en PedidosYa (página /pedidosya del sitio) */
   var PY = 'https://www.pedidosya.com.gt/restaurantes/';
@@ -1184,83 +1270,6 @@
 
   updateUI();
   render();
-})();
-</script>
-
-<!-- ===== Máscara de apertura: el video se cierra en el logo ===== -->
-<script>
-(function(){
-  "use strict";
-  var wrap=document.getElementById('gzmxWrap'), mask=document.getElementById('gzmxMask');
-  var A=document.getElementById('gzmxA'), B=document.getElementById('gzmxB');
-  if(!wrap||!mask||!A||!B) return;
-  var reduce=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  var CDN='https://video.wixstatic.com/video/';
-  /* duraciones medidas: coco 3.6s · leche 2.9s · closeup 2.5s → montaje de ~9s.
-     El reel de fresa (31s, vertical) es el que sirve en teléfono. */
-  var V=[
-    '041a89_59ab12dcaa4a432cb24eb9887c7a2ed2',  /* 0 coco b-roll   1280x720 */
-    '041a89_9e0d195039f644c3881bb0d7a2a02b23',  /* 1 leche de coco 1280x720 */
-    '041a89_101c75be2973457f8d0f3b8046547e3a',  /* 2 coco close-up 1280x720 */
-    '041a89_1b44a07fdf5e4d7683314d5afddbd186'   /* 3 reel fresa    vertical */
-  ];
-  var MAX=60;                       /* zoom máximo de la capa */
-  var movil=function(){ return window.matchMedia('(max-width:760px)').matches; };
-  function lista(){ return movil() ? [3] : [0,1,2]; }
-
-  var capas=[A,B], cur=0, pos=0;
-  function url(i){ return CDN+V[i]+'/720p/mp4/file.mp4'; }
-  function cargar(c,i){ if(c.dataset.i!==String(i)){ c.dataset.i=i; c.src=url(i); c.load(); } }
-  function play(c){ var p=c.play(); if(p&&p.catch) p.catch(function(){}); }
-
-  function arrancar(){
-    var L=lista(); pos=0; cur=0;
-    A.loop = B.loop = (L.length===1);
-    cargar(A,L[0]); A.classList.add('on'); B.classList.remove('on');
-    if(!reduce) play(A);
-    if(L.length>1) cargar(B,L[1]);
-  }
-  function siguiente(){
-    var L=lista(); if(L.length<2) return;
-    var otra=capas[1-cur];
-    otra.currentTime=0; play(otra);
-    otra.classList.add('on'); capas[cur].classList.remove('on');
-    cur=1-cur; pos=(pos+1)%L.length;
-    setTimeout(function(){ cargar(capas[1-cur], L[(pos+1)%L.length]); }, 700);
-  }
-  A.addEventListener('ended', siguiente);
-  B.addEventListener('ended', siguiente);
-
-  function logoAncho(){
-    mask.style.setProperty('--gzmx-logo', Math.min(420, Math.round(innerWidth*0.84))+'px');
-  }
-
-  var ticking=false;
-  function paint(){
-    var r=wrap.getBoundingClientRect();
-    var total=wrap.offsetHeight-innerHeight;
-    var p=Math.min(1, Math.max(0, -r.top/(total||1)));
-    /* el video entra de golpe y desacelera hasta posarse en el logo */
-    var e=Math.pow(1-p, 2.2);
-    mask.style.transform='scale('+(1+(MAX-1)*e).toFixed(3)+')';
-    ticking=false;
-  }
-  addEventListener('scroll', function(){ if(!ticking){ ticking=true; requestAnimationFrame(paint); } }, {passive:true});
-  addEventListener('resize', function(){ logoAncho(); paint(); });
-
-  /* los videos solo corren mientras la apertura está en pantalla */
-  if(!reduce && 'IntersectionObserver' in window){
-    new IntersectionObserver(function(es){
-      for(var i=0;i<es.length;i++){
-        if(es[i].isIntersecting){ play(capas[cur]); }
-        else { A.pause(); B.pause(); }
-      }
-    }, {threshold:0.05}).observe(wrap);
-  }
-
-  logoAncho(); arrancar(); paint();
-  if(reduce) mask.style.transform='scale(1)';   /* sin movimiento: queda el logo */
 })();
 </script>
 

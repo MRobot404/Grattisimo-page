@@ -138,14 +138,33 @@
   }
   .gz-spark.f1{ top:-4%; left:12%; }
   .gz-spark.f2{ top:5%; right:11%; color:var(--gz-green); font-size:15px; }
-  .gz-top.play .gz-spark.f1{ animation: gz-pop .5s cubic-bezier(.2,1.4,.4,1) .95s forwards; }
-  .gz-top.play .gz-spark.f2{ animation: gz-pop .5s cubic-bezier(.2,1.4,.4,1) 1.1s forwards; }
+  /* Aparecen con el pop y luego se quedan titilando. El brillo va encadenado
+     al pop (mismo delay + su duración) para que no arranque antes de que la
+     estrella exista. Los dos destellos van desfasados: si laten a la vez
+     parecen un parpadeo de la página, no dos chispas. */
+  .gz-top.play .gz-spark.f1{
+    animation: gz-pop .5s cubic-bezier(.2,1.4,.4,1) .95s forwards,
+               gz-twinkle 3.2s ease-in-out 1.45s infinite; }
+  .gz-top.play .gz-spark.f2{
+    animation: gz-pop .5s cubic-bezier(.2,1.4,.4,1) 1.1s forwards,
+               gz-twinkle 3.8s ease-in-out 2.3s infinite; }
+  @keyframes gz-twinkle{
+    0%, 100%  { opacity:1;   transform:scale(1)    rotate(0deg); }
+    35%       { opacity:.45; transform:scale(.78)  rotate(-18deg); }
+    65%       { opacity:1;   transform:scale(1.18) rotate(14deg); }
+  }
 
+  /* La portada es lo primero que se lee: aquí el kicker no es un pie de foto,
+     es la promesa de la marca. Sube a tamaño de titular y el subtítulo lo
+     acompaña, para que el bloque completo se lea de un vistazo. */
   .gz-top .gz-eyebrow{
     margin-top:28px;
-    font-size:11px; letter-spacing:.18em; text-transform:uppercase;
-    font-weight:600; color:var(--gz-cobre);
+    font-size:clamp(17px, 4.6vw, 22px); letter-spacing:.10em; text-transform:uppercase;
+    font-weight:700; color:var(--gz-cobre); line-height:1.3;
     opacity:0; transform:translateY(14px);
+  }
+  .gz-top .gz-sub{
+    font-size:clamp(16px, 4.2vw, 19px); line-height:1.5; max-width:360px;
   }
   .gz-top.play .gz-eyebrow{ animation: gz-fadeup .55s ease-out .55s forwards; }
   .gz-top.play .gz-sub{     animation: gz-fadeup .55s ease-out .7s  forwards; }
@@ -530,47 +549,78 @@
   .gz-flinks a:hover{ text-decoration:underline; }
   .gz-copy{ font-size:11.5px; color:rgba(151,207,193,.6); }
 
-  /* ================= SECCIÓN 2 · PALETA 3D (dos caras) =================
-     Escena "estilo Apple": la paleta gira con el scroll (GSAP pinned +
-     scrub) y también se arrastra con inercia. Dos caras: tu sabor / tu
-     salud. Fallback estático elegante sin GSAP / con reduced-motion. */
+  /* ================= SECCIÓN 2 · PALETA (video girando) =================
+     Escena "estilo Apple": el scroll fija la escena (GSAP pinned + scrub) y
+     recorre un video real de la paleta girando (0→fin, una vez). El MP4 no
+     lleva alfa; el fondo blanco se elimina con mix-blend-mode:multiply.
+     Fallback estático con póster sin GSAP / con reduced-motion. */
   .gz3d-outer{ background:#fff; }
   .gz3d-stage{
     position:relative; height:100svh;
     display:flex; align-items:center; justify-content:center;
     overflow:hidden;
   }
+  /* Núcleo blanco tras la paleta + halo menta alrededor. El núcleo importa:
+     el video se compone con `mix-blend-mode:multiply`, así que lo que quede
+     detrás de la paleta tiñe sus colores. Blanco puro = sin tinte, naranja
+     fiel; el menta solo asoma en los bordes. */
   .gz3d-bg{
     position:absolute; inset:0;
     background:
-      radial-gradient(60% 50% at 50% 58%, rgba(151,207,193,.35), transparent 70%),
+      radial-gradient(34% 28% at 50% 50%, #fff 62%, rgba(255,255,255,0) 100%),
+      radial-gradient(62% 52% at 50% 56%, rgba(151,207,193,.30), transparent 72%),
       #fff;
   }
-  .gz3d-scene{ position:relative; z-index:2; perspective:1200px; touch-action:pan-y; cursor:grab;
-    transition:transform 200ms cubic-bezier(.23,1,.32,1); }
-  .gz3d-scene.grabbing{ cursor:grabbing; transform:scale(.98); } /* feedback táctil al agarrar */
-  .gz3d-paleta{
-    position:relative; width:min(340px,68vw); aspect-ratio:300/470;
-    transform-style:preserve-3d; will-change:transform;
+  /* La paleta de almendras es color crema: sobre blanco pierde la silueta al
+     lado de la maracuyá. El aro menta se intensifica cuando le toca a ella.
+     El núcleo blanco NO se toca: con `multiply` cualquier color detrás tiñe
+     la paleta, así que el contraste solo puede venir del contorno. Capa
+     aparte porque los gradientes no interpolan: se cruzan opacidades. */
+  .gz3d-bg-b{
+    position:absolute; inset:0; opacity:0;
+    transition:opacity 420ms cubic-bezier(.23,1,.32,1);
+    background:
+      radial-gradient(34% 28% at 50% 50%, #fff 62%, rgba(255,255,255,0) 100%),
+      radial-gradient(62% 52% at 50% 56%, rgba(151,207,193,.42), transparent 72%);
   }
-  .gz3d-cara{ position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden;
-    display:flex; align-items:center; justify-content:center; }
-  .gz3d-cara svg{ width:100%; height:100%; display:block; }
-  .gz3d-foto{ width:100%; height:100%; object-fit:contain;
-    filter:drop-shadow(0 26px 30px rgba(1,70,56,.30)); pointer-events:none; -webkit-user-drag:none; }
-  .gz3d-cara-txt{
-    position:absolute; left:50%; top:40%; transform:translate(-50%,-50%);
-    font-weight:900; font-size:clamp(18px,2.6vw,26px); letter-spacing:-.01em; white-space:nowrap;
-    padding:9px 22px; border-radius:999px; color:#fff;
-    box-shadow:0 12px 28px rgba(1,70,56,.30);
+  .gz3d-stage.mod-b .gz3d-bg-b{ opacity:1; }
+  /* OJO: sin z-index ni transform/opacity aquí. Cualquier stacking context
+     entre el video y .gz3d-bg aislaría el `multiply` y el fondo blanco del
+     clip dejaría de desaparecer. Al ir después del fondo en el DOM ya pinta
+     encima sin necesidad de z-index. */
+  .gz3d-scene{
+    position:relative;
+    width:min(360px,74vw); aspect-ratio:496/864;
   }
-  .gz3d-cara-txt.sabor{ background:var(--gz-rosa-ch); }
-  .gz3d-cara-txt.salud{ background:var(--gz-green); color:var(--gz-menta-p); }
-  .gz3d-cara-salud{ transform:rotateY(180deg); }
-  .gz3d-brillo{
-    position:absolute; inset:0; border-radius:38% 38% 42% 42%/26% 26% 30% 30%;
-    background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.5) 46%,transparent 62%);
-    mix-blend-mode:soft-light; pointer-events:none; transform:translateZ(1px); opacity:.9;
+  .gz3d-video{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:contain;
+    /* El MP4 no lleva canal alfa: el fondo blanco del render se elimina al
+       multiplicarse contra el fondo de la escena, y la paleta queda
+       "recortada" sin reconvertir el archivo. Funciona en Safari/iOS. */
+    mix-blend-mode:multiply;
+    /* Cada clip trae la paleta a distinta escala dentro del cuadro: medido
+       sobre 12 frames de cada giro, la de almendras ocupa 1.87x el área de la
+       de maracuyá. Se corrige cada una hacia el promedio (así ninguna manda)
+       y se recentra en vertical, porque sus cuerpos tampoco están a la misma
+       altura (364 vs 408 de 864) y el relevo brincaría. */
+    --gz-esc:1; --gz-y:0%;
+    opacity:0;
+    transform:translateY(var(--gz-y)) scale(calc(var(--gz-esc) * .965));
+    /* Relevo secuencial, no cruzado: dos capas `multiply` encimadas se
+       multiplican entre sí y la silueta se ensucia en el traslape. Primero
+       sale una, después entra la otra. */
+    transition:opacity 160ms linear, transform 160ms cubic-bezier(.23,1,.32,1);
+    -webkit-user-select:none; user-select:none; pointer-events:none;
+  }
+  .gz3d-video[data-modelo="0"]{ --gz-esc:1.169; --gz-y:3.4%;  } /* maracuyá */
+  .gz3d-video[data-modelo="1"]{ --gz-esc:.855;  --gz-y:-3.4%; } /* almendras */
+  /* El relevo entra a los 130ms, 30ms antes de que la anterior termine de
+     salir: sin ese pisón mínimo hay un frame con la escena vacía y se lee
+     como parpadeo. A esa opacidad el doble multiply no se nota. */
+  .gz3d-video.act{
+    opacity:1;
+    transform:translateY(var(--gz-y)) scale(var(--gz-esc));
+    transition:opacity 260ms linear 130ms, transform 460ms cubic-bezier(.23,1,.32,1) 130ms;
   }
   .gz3d-callout{
     position:absolute; z-index:3; max-width:300px; text-align:center;
@@ -675,6 +725,7 @@
 <div class="gz3d-outer" id="gzProducto">
   <section class="gz3d-stage" id="gz3dStage">
     <div class="gz3d-bg" aria-hidden="true"></div>
+    <div class="gz3d-bg-b" aria-hidden="true"></div>
 
     <div class="gz3d-callout gz3d-top act" data-step="0">
       <h3>Trozos de <span class="rosa">fruta real</span></h3>
@@ -693,22 +744,24 @@
       <p>Dos caras de la misma paleta. Así reinventamos el postre.</p>
     </div>
 
-    <div class="gz3d-scene" id="gz3dScene" aria-label="Paleta Grattisimo en 3D — arrástrala para girarla">
-      <div class="gz3d-paleta" id="gz3dPaleta">
-        <!-- CARA SABOR: foto real de la paleta + etiqueta -->
-        <div class="gz3d-cara gz3d-cara-sabor">
-          <img class="gz3d-foto" src="helados/maracuya.png" alt="Paleta Grattisimo" draggable="false">
-          <span class="gz3d-cara-txt sabor">tu sabor</span>
-        </div>
-        <!-- CARA SALUD: la misma paleta, el otro mensaje -->
-        <div class="gz3d-cara gz3d-cara-salud">
-          <img class="gz3d-foto" src="helados/maracuya.png" alt="Paleta Grattisimo" draggable="false">
-          <span class="gz3d-cara-txt salud">tu salud</span>
-        </div>
-      </div>
+    <!-- Dos paletas reales girando. El scroll fija la escena y "seekea" el
+         video de 0→fin una sola vez, y en cada texto se releva el modelo:
+         maracuyá → almendras → maracuyá → almendras. `playsinline`+`muted`
+         para que iOS no lo abra a pantalla completa ni pida gesto. -->
+    <div class="gz3d-scene" id="gz3dScene">
+      <video class="gz3d-video act" data-modelo="0"
+             src="helados/paleta-maracuya.mp4"
+             poster="helados/paleta-maracuya-poster.jpg"
+             muted playsinline webkit-playsinline preload="auto"
+             aria-label="Paleta de maracuyá Grattisimo girando"></video>
+      <video class="gz3d-video" data-modelo="1"
+             src="helados/paleta-almendras.mp4"
+             poster="helados/paleta-almendras-poster.jpg"
+             muted playsinline webkit-playsinline preload="auto"
+             aria-label="Paleta de almendras Grattisimo girando"></video>
     </div>
 
-    <span class="gz3d-tip">Arrástrala · gírala tú</span>
+    <span class="gz3d-tip">Baja para girarla</span>
   </section>
 </div>
 
@@ -1281,87 +1334,105 @@
   "use strict";
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  var paleta = document.getElementById('gz3dPaleta');
-  var scene  = document.getElementById('gz3dScene');
-  var brillo = document.getElementById('gz3dBrillo');
-  if (!paleta || !scene) return;
+  var stage  = document.getElementById('gz3dStage');
+  var videos = [].slice.call(document.querySelectorAll('.gz3d-video'));
+  if (!videos.length) return;
   var callouts = [].slice.call(document.querySelectorAll('.gz3d-callout'));
 
-  var scrollDeg = 0, dragDeg = 0, idleDeg = 0, vel = 0, dragging = false, lastX = 0, raf = null;
-  var inView = false, allowIdle = false;
-  var IDLE = 0.12; /* grados por frame en reposo (~7°/s) */
+  /* Qué paleta acompaña a cada texto: los modelos se relevan para que el
+     cambio de mensaje se sienta también en la imagen. */
+  var MODELO = [0, 1, 0, 1];
 
-  function render(){
-    var deg = scrollDeg + dragDeg + idleDeg;
-    paleta.style.transform = 'rotateY(' + deg + 'deg)';
-    /* brillo especular que recorre la cara según el ángulo */
-    var m = ((deg % 360) + 360) % 360;
-    var shift = Math.sin(m * Math.PI / 180) * 70;
-    if (brillo) brillo.style.transform = 'translateZ(1px) translateX(' + shift + '%)';
-  }
+  /* paso y modelo se cachean: onUpdate corre en cada frame del scroll y tocar
+     classList a 60fps fuerza recálculo de estilo sin necesidad */
+  var paso = -1;
   function setStep(i){
+    if (i === paso) return;
+    paso = i;
     callouts.forEach(function(c, idx){ c.classList.toggle('act', idx === i); });
   }
 
-  /* bucle único: inercia tras soltar + auto-rotación suave en reposo,
-     solo mientras la escena está en pantalla */
-  function loop(){
-    if (!inView){ raf = null; return; }
-    var moving = false;
-    if (dragging){
-      moving = true;
-    } else if (Math.abs(vel) > 0.02){
-      dragDeg += vel; vel *= 0.94; moving = true;      /* inercia */
-    } else if (allowIdle){
-      idleDeg += IDLE; moving = true;                   /* "viva" en reposo */
-    }
-    render();
-    raf = moving ? requestAnimationFrame(loop) : null;
+  var modelo = 0;
+  function setModelo(i){
+    if (i === modelo) return;
+    modelo = i;
+    videos.forEach(function(v, idx){ v.classList.toggle('act', idx === i); });
+    if (stage) stage.classList.toggle('mod-b', i === 1);   /* aro de color */
   }
-  function startLoop(){ if (!raf) raf = requestAnimationFrame(loop); }
-  function onDown(x){ dragging = true; lastX = x; vel = 0; scene.classList.add('grabbing'); startLoop(); }
-  function onMove(x){ if (!dragging) return; var dx = x - lastX; lastX = x; vel = dx * 0.45; dragDeg += dx * 0.45; render(); }
-  function onUp(){ if (!dragging) return; dragging = false; scene.classList.remove('grabbing'); startLoop(); }
 
-  scene.addEventListener('pointerdown', function(e){ scene.setPointerCapture(e.pointerId); onDown(e.clientX); });
-  scene.addEventListener('pointermove', function(e){ onMove(e.clientX); });
-  scene.addEventListener('pointerup', onUp);
-  scene.addEventListener('pointercancel', onUp);
+  /* iOS no deja "seekear" un <video> hasta que se ha reproducido una vez.
+     Un play()/pause() mudo tras el primer gesto lo desbloquea sin que se
+     vea reproducir. Hay que hacerlo con cada elemento, no solo el visible. */
+  var warmed = false;
+  function warmup(){
+    if (warmed) return; warmed = true;
+    videos.forEach(function(v){
+      var p = v.play();
+      if (p && p.then) p.then(function(){ v.pause(); }).catch(function(){});
+      else { try { v.pause(); } catch(e){} }
+    });
+  }
+  ['pointerdown','touchstart','wheel','keydown'].forEach(function(ev){
+    window.addEventListener(ev, warmup, { once:true, passive:true });
+  });
+
+  /* seek con umbral: escribir currentTime cada frame satura el decoder;
+     solo se salta si el objetivo cambió al menos ~medio frame. Cada clip usa
+     su propia duración, así que el avance se pasa normalizado (0→1) y no en
+     segundos: los dos quedan en el mismo punto del giro aunque duren distinto. */
+  var lastT = [];
+  function seek(i, p){
+    var v = videos[i]; if (!v) return;
+    var d = v.duration;
+    if (!d || !isFinite(d)) return;
+    var t = p * d;
+    t = t < 0 ? 0 : (t > d - 0.05 ? d - 0.05 : t);
+    if (Math.abs(t - (lastT[i] === undefined ? -1 : lastT[i])) < 0.016) return;
+    lastT[i] = t;
+    try { v.currentTime = t; } catch(e){}
+  }
+
+  /* El que no se ve también se mantiene en posición, pero a menor frecuencia:
+     "seekear" dos videos a 60fps satura el decoder en móvil, y sin esto el
+     relevo mostraría el ángulo viejo por un instante. */
+  var idleAt = 0;
+  function seekOculto(i, p){
+    var now = (window.performance && performance.now()) || Date.now();
+    if (now - idleAt < 120) return;
+    idleAt = now;
+    seek(i, p);
+  }
 
   var hasGSAP = typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined';
 
   if (reduce || !hasGSAP){
-    /* Fallback elegante: escena estática, callouts visibles, arrastre activo */
+    /* Fallback: escena estática con el póster, callouts apilados y visibles */
     document.documentElement.classList.add('gz3d-reduced');
     callouts.forEach(function(c){ c.classList.add('act'); });
-    inView = true;   /* permite arrastrar/inercia aunque no haya auto-rotación */
-    render();
     return;
   }
 
   gsap.registerPlugin(ScrollTrigger);
 
-  /* Escena fija: 540° de giro en ~2.6 pantallas de scroll (estilo Apple) */
-  var TOTAL = 540;
-  gsap.timeline({
-    scrollTrigger:{
-      trigger:'#gz3dStage', start:'top top', end:'+=2600',
-      pin:true, scrub:0.6,
-      onUpdate:function(self){
-        scrollDeg = self.progress * TOTAL;
-        render();
-        setStep(Math.min(3, Math.floor(self.progress * 4)));
-      }
+  /* Escena fija: el scroll recorre el video 0→fin una sola vez (sin saltos),
+     en ~2.6 pantallas. Misma sensación de giro controlado, con footage real. */
+  ScrollTrigger.create({
+    trigger:'#gz3dStage', start:'top top', end:'+=2600',
+    pin:true, scrub:0.6,
+    onUpdate:function(self){
+      var p = self.progress;
+      var i = Math.min(3, Math.floor(p * 4));
+      setStep(i);
+      var m = MODELO[i];
+      setModelo(m);
+      seek(m, p);
+      seekOculto(m === 0 ? 1 : 0, p);
     }
   });
 
-  /* Entrada de la paleta al fijarse la escena */
-  gsap.from('#gz3dPaleta', {
-    scale:0.9, autoAlpha:0, duration:0.7, ease:'power3.out',
-    scrollTrigger:{ trigger:'#gz3dStage', start:'top 70%' }
-  });
-
-  render();
+  /* Sin animación de entrada a propósito: aplicarle transform u opacity a un
+     ancestro del video crearía un stacking context y el `multiply` dejaría de
+     ver el fondo de la escena — reaparecería el rectángulo blanco del clip. */
 })();
 </script>
 </body>

@@ -513,6 +513,40 @@
     transition:background .2s, color .2s, border-color .2s, transform .2s;
   }
   .gz-chip:hover{ background:var(--gz-green); color:var(--gz-cream); border-color:var(--gz-green); transform:translateY(-2px); }
+  .gz-chip .km{ margin-left:6px; font-weight:500; opacity:.65; font-size:12px; }
+  .gz-chip.near{ background:var(--gz-green); color:var(--gz-cream); border-color:var(--gz-green); }
+
+  /* sede más cercana (geolocalización) */
+  .gz-near-btn{
+    display:inline-flex; align-items:center; gap:8px; margin-top:24px;
+    background:var(--gz-rosa-ch); color:#fff; border:0; cursor:pointer;
+    font:inherit; font-weight:700; letter-spacing:.04em; font-size:14px;
+    padding:14px 24px; border-radius:999px;
+    box-shadow:0 10px 22px rgba(242,121,161,.38);
+    transition:transform .25s, box-shadow .25s, opacity .2s;
+  }
+  .gz-near-btn:hover{ transform:translateY(-2px); box-shadow:0 14px 28px rgba(242,121,161,.46); }
+  .gz-near-btn:disabled{ opacity:.7; cursor:progress; transform:none; }
+  .gz-near-msg{ min-height:1.4em; margin:12px auto 0; font-size:13px; color:var(--gz-gray); max-width:480px; }
+  .gz-near-card{
+    max-width:440px; margin:18px auto 0; padding:22px 20px; text-align:center;
+    background:#fff; border-radius:20px; box-shadow:0 12px 28px rgba(1,70,56,.1);
+    animation:gzNearIn .45s cubic-bezier(.32,.72,0,1);
+  }
+  .gz-near-card[hidden]{ display:none; }
+  .gz-near-card .lbl{ font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gz-cobre); }
+  .gz-near-card h3{ font-size:20px; margin:6px 0 4px; }
+  .gz-near-card .dist{ font-size:13px; color:var(--gz-gray); margin:0; }
+  .gz-near-acts{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px; }
+  .gz-near-acts a{
+    text-decoration:none; font-weight:700; font-size:13px; padding:11px 18px; border-radius:999px;
+    transition:transform .2s;
+  }
+  .gz-near-acts a:hover{ transform:translateY(-2px); }
+  .gz-near-acts .py{ background:var(--gz-green); color:var(--gz-cream); }
+  .gz-near-acts .map{ border:1.5px solid rgba(1,70,56,.25); color:var(--gz-green); }
+  @keyframes gzNearIn{ from{ opacity:0; transform:translateY(12px) scale(.97); } to{ opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce){ .gz-near-card{ animation:none; } }
 
   /* --- 9 · cómo pedir (banda menta) --- */
   .gz-order{ background:#E3F3ED; padding:56px 16px 62px; text-align:center; }
@@ -905,6 +939,17 @@
   <h2 class="gz-title gz-r d1">Tu heladería favorita, más cerca de lo que crees</h2>
   <p class="gz-lead gz-r d2">Búscanos dentro de Paiz, Walmart y restaurantes Los Cebollines
     en toda Ciudad de Guatemala. Toca tu tienda más cercana para pedir en PedidosYa.</p>
+  <button type="button" class="gz-near-btn gz-r d2" id="gzNearBtn">📍 ¿Cuál me queda más cerca?</button>
+  <p class="gz-near-msg" id="gzNearMsg" role="status" aria-live="polite"></p>
+  <div class="gz-near-card" id="gzNearCard" hidden>
+    <p class="lbl">Tu Grattisimo más cercano</p>
+    <h3 id="gzNearName"></h3>
+    <p class="dist" id="gzNearDist"></p>
+    <div class="gz-near-acts">
+      <a class="py" id="gzNearPy" target="_blank" rel="noopener">Pedir en PedidosYa</a>
+      <a class="map" id="gzNearMap" target="_blank" rel="noopener">Cómo llegar</a>
+    </div>
+  </div>
   <div class="gz-chips" id="gzChips"></div>
 </section>
 
@@ -1266,20 +1311,21 @@
   mordidaAlDeslizar('gzFruta');
   mordidaAlDeslizar('gzCremosos');
 
-  /* 11 tiendas con link directo a su menú en PedidosYa (página /pedidosya del sitio) */
+  /* 11 tiendas con link directo a su menú en PedidosYa (página /pedidosya del sitio).
+     [nombre, url, lat, lng] — coordenadas del centro comercial anfitrión (OpenStreetMap). */
   var PY = 'https://www.pedidosya.com.gt/restaurantes/';
   var TIENDAS = [
-    ['Megacentro · Zona 7',      PY + 'ciudad-de-guatemala/helados-grattisimo-mega-centro-7dba5fb7-9026-43be-9fd1-d92fa24eef61-menu'],
-    ['Utatlán II · Zona 11',     PY + 'colegio-capouilliez/helados-grattisimo-utatlan-00c789c7-10e2-49f8-abf8-cacf6a27660b-menu'],
-    ['Novicentro · Zona 11',     PY + 'novicentro-zona-11/helados-grattisimo-novicentro-3f56d3e7-5a50-4645-ac31-60b3367582aa-menu'],
-    ['Pacific Center · Zona 11', PY + 'ciudad-de-guatemala/helados-grattisimo-pacific-61a5d3c1-1dc7-431a-a1c6-b0b12a32d4bf-menu'],
-    ['Petapa · Zona 12',         PY + 'ciudad-de-guatemala/helados-grattisimo-petapa-3732df7d-5d34-4a8e-919e-7551ccc20d3c-menu'],
-    ['Vista Hermosa · Zona 15',  PY + 'ciudad-de-guatemala/helados-grattisimo-z15-7bcec783-c669-4734-8d68-05d6dc28aacd-menu'],
-    ['Santa Amelia · Zona 16',   PY + 'ciudad-de-guatemala/helados-grattisimo-z16-61b5de05-8931-48ec-94af-9d3164b05296-menu'],
-    ['Eskala · Roosevelt',       PY + 'ciudad-de-guatemala/helados-grattisimo-mixco-716a4c01-4f44-436f-bf36-82a69d94c050-menu'],
-    ['El Naranjo · Mixco',       PY + 'ciudad-de-guatemala/helados-grattisimo-naranjo-ec5151ee-3257-4c0e-b287-5c01c0892bc6-menu'],
-    ['San Cristóbal · Mixco',    PY + 'ciudad-de-guatemala/helados-grattisimo-sancris-572f3285-715e-48d8-af00-dbfb81e57aa7-menu'],
-    ['Villa Flor · CAES',        PY + 'ciudad-de-guatemala/helados-grattisimo-pinula-a7b43d0f-5890-4bdb-8b23-ef0e9e46d674-menu']
+    ['Megacentro · Zona 7',      PY + 'ciudad-de-guatemala/helados-grattisimo-mega-centro-7dba5fb7-9026-43be-9fd1-d92fa24eef61-menu', 14.62639, -90.55449],
+    ['Utatlán II · Zona 11',     PY + 'colegio-capouilliez/helados-grattisimo-utatlan-00c789c7-10e2-49f8-abf8-cacf6a27660b-menu',    14.62729, -90.56177],
+    ['Novicentro · Zona 11',     PY + 'novicentro-zona-11/helados-grattisimo-novicentro-3f56d3e7-5a50-4645-ac31-60b3367582aa-menu',   14.60240, -90.56207],
+    ['Pacific Center · Zona 11', PY + 'ciudad-de-guatemala/helados-grattisimo-pacific-61a5d3c1-1dc7-431a-a1c6-b0b12a32d4bf-menu',     14.59395, -90.55902],
+    ['Petapa · Zona 12',         PY + 'ciudad-de-guatemala/helados-grattisimo-petapa-3732df7d-5d34-4a8e-919e-7551ccc20d3c-menu',      14.58348, -90.54699],
+    ['Vista Hermosa · Zona 15',  PY + 'ciudad-de-guatemala/helados-grattisimo-z15-7bcec783-c669-4734-8d68-05d6dc28aacd-menu',         14.59222, -90.49380],
+    ['Santa Amelia · Zona 16',   PY + 'ciudad-de-guatemala/helados-grattisimo-z16-61b5de05-8931-48ec-94af-9d3164b05296-menu',         14.62595, -90.47069],
+    ['Eskala · Roosevelt',       PY + 'ciudad-de-guatemala/helados-grattisimo-mixco-716a4c01-4f44-436f-bf36-82a69d94c050-menu',       14.63579, -90.58208],
+    ['El Naranjo · Mixco',       PY + 'ciudad-de-guatemala/helados-grattisimo-naranjo-ec5151ee-3257-4c0e-b287-5c01c0892bc6-menu',     14.65425, -90.53994],
+    ['San Cristóbal · Mixco',    PY + 'ciudad-de-guatemala/helados-grattisimo-sancris-572f3285-715e-48d8-af00-dbfb81e57aa7-menu',     14.60267, -90.58139],
+    ['Villa Flor · CAES',        PY + 'ciudad-de-guatemala/helados-grattisimo-pinula-a7b43d0f-5890-4bdb-8b23-ef0e9e46d674-menu',      14.56285, -90.46455]
   ];
   var chips = document.getElementById('gzChips');
   TIENDAS.forEach(function(t, i){
@@ -1290,8 +1336,84 @@
     a.target = '_blank';
     a.rel = 'noopener';
     a.textContent = t[0];
+    t.chip = a;
     chips.appendChild(a);
   });
+
+  /* sede más cercana: geolocalización del navegador + distancia en línea recta (haversine).
+     La ubicación no sale del navegador: el cálculo es local. */
+  (function(){
+    var btn  = document.getElementById('gzNearBtn');
+    var msg  = document.getElementById('gzNearMsg');
+    var card = document.getElementById('gzNearCard');
+    var LABEL = btn.textContent;
+
+    function km(lat1, lng1, lat2, lng2){
+      var R = 6371, rad = Math.PI / 180;
+      var dLat = (lat2 - lat1) * rad, dLng = (lng2 - lng1) * rad;
+      var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      return 2 * R * Math.asin(Math.sqrt(h));
+    }
+    function fmtKm(d){ return d < 1 ? Math.round(d * 1000) + ' m' : d.toFixed(1).replace('.0', '') + ' km'; }
+
+    function mostrar(lat, lng){
+      var orden = TIENDAS.map(function(t){ return { t:t, d:km(lat, lng, t[2], t[3]) }; })
+                         .sort(function(a, b){ return a.d - b.d; });
+      var top = orden[0];
+
+      /* chips ordenados por cercanía, con su distancia */
+      orden.forEach(function(o, i){
+        var c = o.t.chip;
+        c.textContent = o.t[0];
+        var s = document.createElement('span');
+        s.className = 'km';
+        s.textContent = fmtKm(o.d);
+        c.appendChild(s);
+        c.classList.toggle('near', i === 0);
+        c.style.transitionDelay = '0ms';
+        chips.appendChild(c);
+      });
+
+      document.getElementById('gzNearName').textContent = 'Grattisimo ' + top.t[0];
+      document.getElementById('gzNearDist').textContent = 'A unos ' + fmtKm(top.d) + ' de ti (en línea recta)';
+      document.getElementById('gzNearPy').href = top.t[1];
+      document.getElementById('gzNearMap').href =
+        'https://www.google.com/maps/dir/?api=1&destination=' + top.t[2] + ',' + top.t[3];
+      card.hidden = false;
+      msg.textContent = top.d > 40
+        ? 'Parece que estás fuera de la ciudad; esta es la sede más cercana.'
+        : '';
+    }
+
+    function fallo(e){
+      var txt = {
+        1: 'Necesitamos permiso para ver tu ubicación. Actívalo en tu navegador e intenta de nuevo.',
+        2: 'No pudimos obtener tu ubicación. Revisa que el GPS o la ubicación estén activos.',
+        3: 'Tardó demasiado en encontrarte. Intenta de nuevo.'
+      };
+      msg.textContent = txt[e && e.code] || txt[2];
+    }
+
+    btn.addEventListener('click', function(){
+      if (!('geolocation' in navigator)){
+        msg.textContent = 'Tu navegador no permite ubicarte. Elige tu tienda de la lista.';
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = '📍 Buscándote…';
+      msg.textContent = '';
+      navigator.geolocation.getCurrentPosition(function(pos){
+        btn.disabled = false;
+        btn.textContent = LABEL;
+        mostrar(pos.coords.latitude, pos.coords.longitude);
+      }, function(e){
+        btn.disabled = false;
+        btn.textContent = LABEL;
+        fallo(e);
+      }, { enableHighAccuracy:false, timeout:12000, maximumAge:300000 });
+    });
+  })();
 
   /* contador animado de cifras (respaldo) */
   function countUp(el){

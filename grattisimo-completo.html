@@ -689,9 +689,24 @@
   .gz-footer img{ height:42px; margin-bottom:4px; }
   .gz-footer .tag{ font-style:italic; color:var(--gz-menta-p); font-size:12.5px; }
   .gz-footer .mision{ max-width:500px; margin:16px auto 20px; line-height:1.65; }
-  .gz-flinks{ display:flex; gap:20px; justify-content:center; flex-wrap:wrap; margin-bottom:18px; }
-  .gz-flinks a{ color:var(--gz-cream); text-decoration:none; font-weight:600; }
-  .gz-flinks a:hover{ text-decoration:underline; }
+  .gz-flinks{ display:flex; gap:12px; justify-content:center; align-items:center; flex-wrap:wrap; margin-bottom:22px; }
+  .gz-flinks a{
+    display:inline-flex; align-items:center; gap:7px;
+    color:var(--gz-cream); text-decoration:none; font-weight:600;
+    transition:color .2s;
+  }
+  .gz-flinks a:hover{ color:var(--gz-menta-p); }
+  .gz-flinks svg{ width:18px; height:18px; flex:0 0 auto; }
+  /* cada contacto es una píldora; Llamar / WhatsApp comparten la suya */
+  .gz-flinks > a, .gz-fl-tel{
+    padding:9px 16px; border-radius:999px;
+    border:1.5px solid rgba(203,223,212,.28);
+    transition:border-color .2s, background .2s;
+  }
+  .gz-flinks > a:hover, .gz-fl-tel:hover{ border-color:var(--gz-menta-p); background:rgba(255,255,255,.05); }
+  .gz-fl-tel{ display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center; }
+  .gz-fl-tel .sep{ opacity:.45; }
+  .gz-fl-tel small{ font-size:11.5px; color:#CBDFD4; opacity:.8; }
   .gz-copy{ font-size:11.5px; color:rgba(151,207,193,.6); }
 
   /* ================= SECCIÓN 2 · PALETA (crece con el scroll) =================
@@ -1093,11 +1108,29 @@
   <p class="mision">Es difícil encontrar un postre que sea rico y saludable. En Grattisimo
     hacemos helados deliciosos y bajos en calorías para que disfrutes del postre sin
     descuidar tu salud.</p>
+  <!-- contacto y redes con su icono; el mismo número atiende llamadas y WhatsApp -->
   <div class="gz-flinks">
-    <a href="tel:+50255740469">+502 5574 0469</a>
-    <a href="https://www.instagram.com/grattisimo/" target="_blank" rel="noopener">Instagram</a>
+    <span class="gz-fl-tel">
+      <a href="tel:+50255740469" aria-label="Llamar al +502 5574 0469">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5h2.6l1.3 4.1-2 1.5a12 12 0 0 0 6.4 6.4l1.5-2 4.1 1.3v2.6a2 2 0 0 1-2.2 2A16.8 16.8 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        Llamar
+      </a>
+      <span class="sep" aria-hidden="true">/</span>
+      <a href="https://wa.me/50255740469?text=%C2%A1Hola%21%20Quiero%20hacer%20un%20pedido%20%F0%9F%8D%A6" target="_blank" rel="noopener" aria-label="Escribir por WhatsApp al +502 5574 0469">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 20l1.1-3.7A8.3 8.3 0 1 1 8.4 19Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.2 8.2c.3-.4.7-.4 1-.1l.8 1.5c.1.3 0 .6-.2.8l-.5.5a5.6 5.6 0 0 0 2.8 2.8l.5-.5c.2-.2.5-.3.8-.2l1.5.8c.3.3.3.7-.1 1-1 1-2.4 1-4.4-.4-1.4-1-2.5-2.1-3.1-3.6-.5-1.3-.1-2.2.9-2.6Z" fill="currentColor"/></svg>
+        WhatsApp
+      </a>
+      <small>+502 5574 0469</small>
+    </span>
+    <a href="https://www.instagram.com/grattisimo/" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.2" fill="currentColor"/></svg>
+      Instagram
+    </a>
     <!-- URL de Facebook asumida (el arte oficial solo muestra "@grattisimo") -->
-    <a href="https://www.facebook.com/grattisimo" target="_blank" rel="noopener">Facebook</a>
+    <a href="https://www.facebook.com/grattisimo" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4a21 21 0 0 0-2.4-.1c-2.4 0-4 1.4-4 4.1v2.1H7.6v3h2.6V21Z" fill="currentColor"/></svg>
+      Facebook
+    </a>
   </div>
   <p class="gz-copy">© 2026 Grattisimo — Todos los derechos reservados.</p>
 </footer>

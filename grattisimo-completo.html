@@ -322,8 +322,9 @@
     touch-action: pan-y;
     user-select:none; -webkit-user-select:none;
     opacity:0; transform:translateY(16px);
-    /* abajo: espacio para el reflejo (≈ 64 % del alto de la tarjeta) */
-    padding:8px 0 calc(var(--gz-card-w) * .8);
+    /* abajo: espacio justo para el reflejo recortado (≈ 29 % del alto de la
+       tarjeta; el reflejo visible llega a ≈ 26 %) */
+    padding:8px 0 calc(var(--gz-card-w) * .36);
   }
   /* piso brillante donde se apoyan los helados */
   .gz-viewport::before{
@@ -364,15 +365,17 @@
     transform:translateY(3.7%);
   }
   /* reflejo: el mismo PNG volteado bajo el piso, desvanecido con una máscara
-     (la máscara se aplica antes del volteo: "abajo" en la máscara = junto al piso) */
+     (la máscara se aplica antes del volteo: "abajo" en la máscara = junto al piso).
+     Solo se ve el reflejo del palito: la máscara llega a transparente al 70 %
+     (≈ 26 % del alto bajo el piso) y recorta el cuerpo del helado */
   .gz-refl{
     position:absolute; left:0; right:0; top:100%;
     width:100%; height:100%;
     object-fit:contain;
     transform:translateY(-3.7%) scaleY(-1);
     opacity:.62;
-    -webkit-mask-image:linear-gradient(to bottom, transparent 30%, rgba(0,0,0,.45) 62%, #000 100%);
-            mask-image:linear-gradient(to bottom, transparent 30%, rgba(0,0,0,.45) 62%, #000 100%);
+    -webkit-mask-image:linear-gradient(to bottom, transparent 70%, rgba(0,0,0,.5) 86%, #000 100%);
+            mask-image:linear-gradient(to bottom, transparent 70%, rgba(0,0,0,.5) 86%, #000 100%);
     pointer-events:none; user-select:none; -webkit-user-drag:none;
   }
 
@@ -1756,10 +1759,15 @@
   gsap.registerPlugin(ScrollTrigger);
 
   /* Escena fija: el scroll recorre el video 0→fin una sola vez (sin saltos),
-     en ~2.6 pantallas. Misma sensación de giro controlado, con footage real. */
+     en ~4800px (~1200px por paso) para que un deslizamiento rápido no se la
+     salte. scrub:1.4 suaviza: tras un flick el giro alcanza al scroll poco a
+     poco. snap asienta en el centro de cada paso (0 y 1 incluidos para poder
+     salir); directional:false evita que empuje al paso siguiente. */
   ScrollTrigger.create({
-    trigger:'#gz3dStage', start:'top top', end:'+=2600',
-    pin:true, scrub:0.6,
+    trigger:'#gz3dStage', start:'top top', end:'+=4800',
+    pin:true, scrub:1.4, anticipatePin:1,
+    snap:{ snapTo:[0, .125, .375, .625, .875, 1], directional:false,
+           duration:{ min:.3, max:.8 }, delay:.15, ease:'power1.inOut' },
     onUpdate:function(self){
       var p = self.progress;
       var i = Math.min(3, Math.floor(p * 4));

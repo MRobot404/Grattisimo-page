@@ -15,7 +15,7 @@
   /* ================================================================
      GRATTISIMO · PÁGINA COMPLETA (standalone)
      Nav sticky · Portada (logo + videos/fotos reales del sitio) ·
-     Paleta 3D · Mano (foto real) · Visor "Selección 2026" ·
+     Paleta 3D · Mano (foto real) · Visor "Selección Light" ·
      Por qué Grattisimo · Menú (17 fotos reales) · Respaldo ·
      Encuéntranos (11 tiendas → PedidosYa) · Cómo pedir · Footer
 
@@ -273,24 +273,45 @@
   .gz-hero.done .gz-spark, .gz-hero.done .gz-eyebrow, .gz-hero.done .gz-h,
   .gz-hero.done .gz-sub, .gz-hero.done .gz-replay{ opacity:1; transform:none; }
 
-  /* ================= SECCIÓN 4 · SELECCIÓN 2026 =================
+  /* ================= SECCIÓN 4 · SELECCIÓN LIGHT =================
      Carrusel inmersivo a pantalla completa (estilo Apple "highlights"):
      banda verde de borde a borde, tarjetas gigantes, peek lateral. */
+  /* Versión LIGHT: banda clara menta → blanco, como el arte "tu sabor favorito
+     también tiene su lado light" de Instagram. Los helados se reflejan en un
+     piso brillante. */
   .gz-sel{
+    --gz-card-w: min(86vw, 52vh, 460px);
     width:100%;
-    background:var(--gz-green);
+    background:
+      radial-gradient(120% 70% at 50% 0%, #D7EFE7 0%, rgba(215,239,231,0) 70%),
+      linear-gradient(180deg, #E3F3ED 0%, #F6FBF9 58%, #FFFFFF 100%);
+    color:var(--gz-green);
     padding:58px 0 62px;
     text-align:center;
+    overflow:hidden;
   }
   .gz-sel-logo{
-    width:min(72vw, 400px); height:auto;
+    width:min(62vw, 340px); height:auto;
     opacity:0; transform:translateY(16px);
   }
+  .gz-sel-tag{
+    display:inline-flex; align-items:baseline; gap:6px;
+    margin-top:14px; padding:6px 16px 7px; border-radius:999px;
+    background:var(--gz-menta); color:#fff;
+    font-size:13px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+    box-shadow:0 8px 18px rgba(108,193,176,.35);
+    opacity:0; transform:translateY(16px);
+  }
+  .gz-sel-tag i{ font-weight:500; letter-spacing:0; text-transform:none; font-size:15px; }
   .gz-sel-sub{
-    font-size:clamp(15px, 4vw, 20px);
-    font-weight:600; letter-spacing:-.01em;
-    color:var(--gz-menta-p);
-    margin:12px 0 30px;
+    font-size:clamp(16px, 4.2vw, 22px);
+    font-weight:700; letter-spacing:-.01em;
+    color:var(--gz-green);
+    margin:14px auto 6px; padding:0 16px; max-width:560px;
+    opacity:0; transform:translateY(16px);
+  }
+  .gz-sel-lead{
+    font-size:14px; color:var(--gz-gray); margin:0 auto 22px; padding:0 16px;
     opacity:0; transform:translateY(16px);
   }
   .gz-viewport{
@@ -301,7 +322,16 @@
     touch-action: pan-y;
     user-select:none; -webkit-user-select:none;
     opacity:0; transform:translateY(16px);
-    padding:8px 0 26px; /* aire para la sombra de las tarjetas */
+    /* abajo: espacio para el reflejo (≈ 64 % del alto de la tarjeta) */
+    padding:8px 0 calc(var(--gz-card-w) * .8);
+  }
+  /* piso brillante donde se apoyan los helados */
+  .gz-viewport::before{
+    content:''; position:absolute; left:0; right:0; pointer-events:none;
+    top:calc(8px + var(--gz-card-w) * 1.25); bottom:0;
+    background:linear-gradient(180deg, rgba(108,193,176,.16) 0%, rgba(255,255,255,0) 75%);
+    border-top:1px solid rgba(255,255,255,.9);
+    box-shadow:0 -1px 0 rgba(1,70,56,.07);
   }
   .gz-viewport.grabbing{ cursor:grabbing; }
   .gz-track{
@@ -314,9 +344,10 @@
   .gz-card{
     position:relative;
     flex:0 0 auto;
-    width:min(86vw, 61vh, 520px);
+    width:var(--gz-card-w);
     aspect-ratio: 4/5;
     will-change:transform;
+    transform-origin:50% 100%; /* escala desde el piso: el reflejo no se despega */
   }
   /* la foto va fuera del flujo: si participara del layout, su alto natural
      (las paletas son ~0.42 de proporción) le ganaría al aspect-ratio por el
@@ -325,20 +356,36 @@
     position:absolute; inset:0;
     width:100%; height:100%;
     object-fit:contain;
-    filter: drop-shadow(0 24px 24px rgba(0,0,0,.32));
+    filter: drop-shadow(0 18px 18px rgba(1,70,56,.16));
     -webkit-user-drag:none; user-select:none;
     pointer-events:none;
+    /* los PNG traen 33/900 px (≈3.7 %) de aire transparente abajo: bajarlo
+       para que el palito toque el piso */
+    transform:translateY(3.7%);
+  }
+  /* reflejo: el mismo PNG volteado bajo el piso, desvanecido con una máscara
+     (la máscara se aplica antes del volteo: "abajo" en la máscara = junto al piso) */
+  .gz-refl{
+    position:absolute; left:0; right:0; top:100%;
+    width:100%; height:100%;
+    object-fit:contain;
+    transform:translateY(-3.7%) scaleY(-1);
+    opacity:.62;
+    -webkit-mask-image:linear-gradient(to bottom, transparent 30%, rgba(0,0,0,.45) 62%, #000 100%);
+            mask-image:linear-gradient(to bottom, transparent 30%, rgba(0,0,0,.45) 62%, #000 100%);
+    pointer-events:none; user-select:none; -webkit-user-drag:none;
   }
 
   .gz-label{
-    margin-top:14px; min-height:44px;
-    font-size:18px; font-weight:700; letter-spacing:-.01em;
-    color:#fff;
+    margin-top:0; min-height:44px;
+    font-size:20px; font-weight:700; letter-spacing:-.01em;
+    color:var(--gz-green);
     opacity:0; transform:translateY(16px);
   }
+  .gz-label em{ font-style:italic; font-weight:500; color:var(--gz-rosa-ch); margin-left:4px; }
   .gz-label small{
     display:block; font-size:12.5px; font-weight:500;
-    color:var(--gz-menta-p); margin-top:3px;
+    color:var(--gz-gray); margin-top:3px;
   }
   .gz-controls{
     display:flex; align-items:center; justify-content:space-between;
@@ -351,30 +398,34 @@
   .gz-dot{
     width:8px; height:8px; border-radius:999px;
     border:none; padding:0; cursor:pointer;
-    background:rgba(243,227,200,.32);
+    background:rgba(1,70,56,.18);
     transition:width .38s cubic-bezier(.32,.72,0,1), background .3s;
   }
-  .gz-dot.on{ width:30px; background:var(--gz-cream); }
+  .gz-dot.on{ width:30px; background:var(--gz-menta); }
   .gz-arrows{ display:flex; gap:10px; }
   .gz-arrow{
     width:40px; height:40px; border-radius:50%;
     border:none; cursor:pointer;
-    background:rgba(255,255,255,.14); color:var(--gz-cream);
+    background:#fff; color:var(--gz-green);
+    box-shadow:0 6px 14px rgba(1,70,56,.12);
     display:grid; place-items:center;
     transition:background .25s, opacity .25s;
   }
-  .gz-arrow:hover{ background:rgba(255,255,255,.3); }
+  .gz-arrow:hover{ background:var(--gz-menta-p); }
   .gz-arrow:disabled{ opacity:.3; cursor:default; }
   .gz-arrow svg{ display:block; }
 
   .gz-sel.play .gz-sel-logo { animation: gz-in .6s cubic-bezier(.32,.72,0,1) .05s forwards; }
+  .gz-sel.play .gz-sel-tag  { animation: gz-in .6s cubic-bezier(.32,.72,0,1) .1s  forwards; }
   .gz-sel.play .gz-sel-sub  { animation: gz-in .6s cubic-bezier(.32,.72,0,1) .15s forwards; }
+  .gz-sel.play .gz-sel-lead { animation: gz-in .6s cubic-bezier(.32,.72,0,1) .2s  forwards; }
   .gz-sel.play .gz-viewport { animation: gz-in .7s cubic-bezier(.32,.72,0,1) .25s forwards; }
   .gz-sel.play .gz-label    { animation: gz-in .6s cubic-bezier(.32,.72,0,1) .42s forwards; }
   .gz-sel.play .gz-controls { animation: gz-in .6s cubic-bezier(.32,.72,0,1) .5s  forwards; }
   @keyframes gz-in{ to{ opacity:1; transform:translateY(0); } }
 
-  .gz-sel.done .gz-sel-logo, .gz-sel.done .gz-sel-sub, .gz-sel.done .gz-viewport,
+  .gz-sel.done .gz-sel-logo, .gz-sel.done .gz-sel-tag, .gz-sel.done .gz-sel-sub,
+  .gz-sel.done .gz-sel-lead, .gz-sel.done .gz-viewport,
   .gz-sel.done .gz-label, .gz-sel.done .gz-controls{ opacity:1; transform:translateY(0); }
 
   /* ================= SECCIONES DE CONTENIDO (5-10) ================= */
@@ -546,7 +597,64 @@
   .gz-near-acts .py{ background:var(--gz-green); color:var(--gz-cream); }
   .gz-near-acts .map{ border:1.5px solid rgba(1,70,56,.25); color:var(--gz-green); }
   @keyframes gzNearIn{ from{ opacity:0; transform:translateY(12px) scale(.97); } to{ opacity:1; transform:none; } }
-  @media (prefers-reduced-motion: reduce){ .gz-near-card{ animation:none; } }
+
+  /* botón flotante "Más cerca de ti" */
+  .gz-fab{
+    position:fixed; right:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); z-index:70;
+    display:flex; align-items:center; gap:10px; max-width:calc(100vw - 32px);
+    height:56px; padding:0 20px 0 8px; border:0; border-radius:999px; cursor:pointer;
+    background:var(--gz-green); color:var(--gz-cream);
+    font:inherit; font-weight:700; font-size:14px; letter-spacing:.01em;
+    box-shadow:0 14px 30px rgba(1,70,56,.34);
+    transform:translateY(calc(100% + 40px)); opacity:0; pointer-events:none;
+    transition:transform .55s cubic-bezier(.32,.72,0,1), opacity .3s, box-shadow .25s;
+  }
+  .gz-fab.show{ transform:none; opacity:1; pointer-events:auto; }
+  .gz-fab:hover{ box-shadow:0 18px 36px rgba(1,70,56,.42); }
+  .gz-fab:active{ transform:scale(.94); }
+  .gz-fab .pin{
+    position:relative; flex:0 0 auto; width:40px; height:40px; border-radius:50%;
+    display:grid; place-items:center; background:var(--gz-rosa-ch); color:#fff;
+    animation:gzBob 2.4s ease-in-out infinite;
+  }
+  /* onda que sale del pin, como un radar */
+  .gz-fab .pin::after{
+    content:''; position:absolute; inset:0; border-radius:50%;
+    border:2px solid var(--gz-rosa-ch);
+    animation:gzPing 2.4s cubic-bezier(.2,.6,.3,1) infinite;
+  }
+  .gz-fab.busy .pin{ animation:gzSpin 1s linear infinite; }
+  .gz-fab .txt{ display:inline-block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .gz-fab .txt.swap{ animation:gzSwap .42s cubic-bezier(.32,.72,0,1); }
+  .gz-fab.pop{ animation:gzPop .45s cubic-bezier(.32,.72,0,1); }
+  @keyframes gzBob{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-3px); } }
+  @keyframes gzPing{ 0%{ transform:scale(1); opacity:.7; } 80%,100%{ transform:scale(1.7); opacity:0; } }
+  @keyframes gzSpin{ to{ transform:rotate(360deg); } }
+  @keyframes gzSwap{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+  @keyframes gzPop{ 0%{ scale:1; } 40%{ scale:1.08; } 100%{ scale:1; } }
+
+  .gz-fab-pop{
+    position:fixed; right:16px; bottom:calc(84px + env(safe-area-inset-bottom, 0px)); z-index:70;
+    width:min(340px, calc(100vw - 32px)); padding:20px 16px 18px; text-align:center;
+    background:#fff; color:var(--gz-green); border-radius:22px;
+    box-shadow:0 20px 44px rgba(1,70,56,.22);
+    transform-origin:bottom right; animation:gzNearIn .4s cubic-bezier(.32,.72,0,1);
+  }
+  .gz-fab-pop[hidden]{ display:none; }
+  .gz-fab-pop .lbl{ font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gz-cobre); margin:0; }
+  .gz-fab-pop h3{ font-size:18px; margin:6px 0 4px; }
+  .gz-fab-pop .dist{ font-size:13px; color:var(--gz-gray); margin:0; }
+  .gz-fab-err{ font-size:13px; line-height:1.5; color:var(--gz-gray); margin:4px 18px 0; }
+  .gz-fab-x{
+    position:absolute; top:8px; right:10px; width:30px; height:30px; border:0; border-radius:50%;
+    background:transparent; color:var(--gz-gray); font-size:20px; line-height:1; cursor:pointer;
+  }
+  .gz-fab-x:hover{ background:rgba(1,70,56,.08); }
+
+  @media (prefers-reduced-motion: reduce){
+    .gz-near-card, .gz-fab-pop{ animation:none; }
+    .gz-fab .pin, .gz-fab .pin::after, .gz-fab .txt.swap, .gz-fab.pop{ animation:none; }
+  }
 
   /* --- 9 · cómo pedir (banda menta) --- */
   .gz-order{ background:#E3F3ED; padding:56px 16px 62px; text-align:center; }
@@ -816,14 +924,15 @@
 </section>
 
 
-<!-- ============ SECCIÓN 4 · SELECCIÓN 2026 ============ -->
+<!-- ============ SECCIÓN 4 · SELECCIÓN LIGHT ============ -->
 <section class="gz-sel" id="gzSel">
-  <!-- logo grande de marca sobre la banda verde -->
-  <img class="gz-sel-logo"
-       src="https://static.wixstatic.com/media/041a89_06996c0f1e0248b7b634b0da6f17e19c~mv2.png"
+  <!-- logo Verde sobre la banda clara -->
+  <img class="gz-sel-logo" src="logo-verde.png"
        alt="Grattisimo — tu sabor, tu salud" loading="lazy">
-  <!-- ✏️ COPY: texto placeholder -->
-  <h2 class="gz-sel-sub">Selección 2026 — elige a tu titular</h2>
+  <br>
+  <span class="gz-sel-tag">Versión <i>light</i></span>
+  <h2 class="gz-sel-sub">Tu sabor favorito también tiene su lado light</h2>
+  <p class="gz-sel-lead">Helados de fruta Light: frescos y llenos de sabor. 0 culpas, puro Grattisimo.</p>
 
   <div class="gz-viewport" id="gzVp">
     <div class="gz-track" id="gzTrack"><!-- tarjetas generadas en JS desde SABORES --></div>
@@ -906,7 +1015,7 @@
     <div class="gz-flav" id="gzCremosos"></div>
   </div>
 
-  <p class="gz-note gz-r">…y ediciones especiales de temporada — pregunta por la Selección 2026 🍦</p>
+  <p class="gz-note gz-r">…y versión Light de tus frutas favoritas — pregunta por ella en tu tienda 🍦</p>
 </section>
 
 <!-- ============ SECCIÓN 5 · RESPALDO ============ -->
@@ -997,6 +1106,27 @@
   <p class="gz-copy">© 2026 Grattisimo — Todos los derechos reservados.</p>
 </footer>
 
+<!-- ============ BOTÓN FLOTANTE · MÁS CERCA DE TI ============ -->
+<div class="gz-fab-pop" id="gzFabPop" hidden role="dialog" aria-label="Tu Grattisimo más cercano">
+  <button type="button" class="gz-fab-x" id="gzFabClose" aria-label="Cerrar">×</button>
+  <p class="gz-fab-err" id="gzFabErr" hidden></p>
+  <div id="gzFabOk">
+    <p class="lbl">Tu Grattisimo más cercano</p>
+    <h3 id="gzFabName"></h3>
+    <p class="dist" id="gzFabDist"></p>
+    <div class="gz-near-acts">
+      <a class="py" id="gzFabPy" target="_blank" rel="noopener">Pedir en PedidosYa</a>
+      <a class="map" id="gzFabMap" target="_blank" rel="noopener">Cómo llegar</a>
+    </div>
+  </div>
+</div>
+<button type="button" class="gz-fab" id="gzFab" aria-expanded="false" aria-controls="gzFabPop">
+  <span class="pin" aria-hidden="true">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12Z" fill="currentColor"/><circle cx="12" cy="10" r="2.6" fill="#F279A1"/></svg>
+  </span>
+  <span class="txt" id="gzFabTxt">Más cerca de ti</span>
+</button>
+
 <script>
 (function(){
   'use strict';
@@ -1061,14 +1191,14 @@
     function(){ hero.classList.add('done'); });
 
   /* ---------- Sección 4: slider estilo Apple ---------- */
-  /* [nombre, subtítulo, slug de imagen en helados/] */
+  /* Línea Light (sabores confirmados en el Instagram de @grattisimo).
+     [nombre, subtítulo, slug de imagen en helados/] */
   var SABORES = [
-    ['Maracuyá',         'Light · sin azúcar',   'maracuya'],
-    ['Mango Chamoy',     'Fruta · 100% natural', 'mango-chamoy'],
-    ['Carbón Activado',  'Cremoso',              'carbon-activado'],
-    ['Coctel de Frutas', 'Light · sin azúcar',   'coctel-frutas'],
-    ['Tamarindo Tajín',  'Fruta · con tajín',    'tamarindo-tajin'],
-    ['Maní con Café',    'Cremoso · intenso',    'mania-cafe']
+    ['Mango',            'Fruta natural · 0 culpas',       'mango'],
+    ['Coco',             'Cremosito, pero light',          'coco'],
+    ['Cóctel de Frutas', 'Varias frutas en un helado',     'coctel-frutas'],
+    ['Mora',             'Fruta natural · 0 culpas',       'mora'],
+    ['Maracuyá',         'Fresco y ácido · 0 culpas',      'maracuya']
   ];
   var N = SABORES.length;
   var GAP = 18; /* debe coincidir con el gap de .gz-track en el CSS */
@@ -1085,8 +1215,9 @@
   SABORES.forEach(function(s){
     var c = document.createElement('div');
     c.className = 'gz-card';
-    c.innerHTML = '<img class="gz-scoop" src="helados/' + s[2] +
-                  '.png" alt="Helado de ' + s[0] + '" draggable="false">';
+    var src = 'helados/' + s[2] + '.png';
+    c.innerHTML = '<img class="gz-scoop" src="' + src + '" alt="Helado de ' + s[0] + ' light" draggable="false">' +
+                  '<img class="gz-refl" src="' + src + '" alt="" aria-hidden="true" draggable="false">';
     track.appendChild(c);
   });
   var cards = track.getElementsByClassName('gz-card');
@@ -1121,13 +1252,15 @@
       var cardCenter = x + off + i * stepW + cw / 2;
       var d = Math.min(Math.abs(cardCenter - center) / stepW, 1.4);
       cards[i].style.transform = 'scale(' + (1 - .08 * d).toFixed(3) + ')';
-      /* "sombra al pasar": el helado que se aleja del centro se oscurece */
-      cards[i].style.filter = 'brightness(' + (1 - .34 * d).toFixed(3) + ')';
+      /* versión light: el helado que se aleja del centro se aclara y pierde color
+         (en vez de oscurecerse, que ensuciaba el fondo claro) */
+      cards[i].style.opacity = (1 - .42 * Math.min(d, 1)).toFixed(3);
+      cards[i].style.filter  = 'saturate(' + (1 - .45 * Math.min(d, 1)).toFixed(3) + ')';
     }
   }
 
   function updateUI(){
-    label.innerHTML = '<strong>' + SABORES[idx][0] + '</strong><small>' + SABORES[idx][1] + '</small>';
+    label.innerHTML = '<strong>' + SABORES[idx][0] + '<em>light</em></strong><small>' + SABORES[idx][1] + '</small>';
     for (var i = 0; i < N; i++) dots.children[i].classList.toggle('on', i === idx);
     prev.disabled = idx === 0;
     next.disabled = idx === N - 1;
@@ -1199,9 +1332,10 @@
 
   window.addEventListener('resize', function(){ x = -idx * step(); render(); });
 
+  /* umbral bajo: con el reflejo la sección es más alta que muchas pantallas */
   observeOnce(sel,
     function(){ sel.classList.add('play'); },
-    function(){ sel.classList.add('done'); });
+    function(){ sel.classList.add('done'); }, 0.2);
 
   /* ---------- Secciones 5-10: contenido real de grattisimo.com ---------- */
   /* [nombre, slug de imagen en helados/] — PNG transparentes oficiales */
@@ -1357,9 +1491,30 @@
     }
     function fmtKm(d){ return d < 1 ? Math.round(d * 1000) + ' m' : d.toFixed(1).replace('.0', '') + ' km'; }
 
-    function mostrar(lat, lng){
-      var orden = TIENDAS.map(function(t){ return { t:t, d:km(lat, lng, t[2], t[3]) }; })
-                         .sort(function(a, b){ return a.d - b.d; });
+    function mapsUrl(t){ return 'https://www.google.com/maps/dir/?api=1&destination=' + t[2] + ',' + t[3]; }
+
+    var ERRORES = {
+      0: 'Tu navegador no permite ubicarte. Elige tu tienda de la lista.',
+      1: 'Necesitamos permiso para ver tu ubicación. Actívalo en tu navegador e intenta de nuevo.',
+      2: 'No pudimos obtener tu ubicación. Revisa que el GPS o la ubicación estén activos.',
+      3: 'Tardó demasiado en encontrarte. Intenta de nuevo.'
+    };
+
+    /* pide la ubicación una vez y la comparte entre el botón de la sección y el flotante */
+    function ubicar(ok, err){
+      if (!('geolocation' in navigator)){ err(0); return; }
+      navigator.geolocation.getCurrentPosition(function(pos){
+        var lat = pos.coords.latitude, lng = pos.coords.longitude;
+        var orden = TIENDAS.map(function(t){ return { t:t, d:km(lat, lng, t[2], t[3]) }; })
+                           .sort(function(a, b){ return a.d - b.d; });
+        mostrar(orden);
+        ok(orden);
+      }, function(e){
+        err(e && ERRORES[e.code] ? e.code : 2);
+      }, { enableHighAccuracy:false, timeout:12000, maximumAge:300000 });
+    }
+
+    function mostrar(orden){
       var top = orden[0];
 
       /* chips ordenados por cercanía, con su distancia */
@@ -1378,41 +1533,105 @@
       document.getElementById('gzNearName').textContent = 'Grattisimo ' + top.t[0];
       document.getElementById('gzNearDist').textContent = 'A unos ' + fmtKm(top.d) + ' de ti (en línea recta)';
       document.getElementById('gzNearPy').href = top.t[1];
-      document.getElementById('gzNearMap').href =
-        'https://www.google.com/maps/dir/?api=1&destination=' + top.t[2] + ',' + top.t[3];
+      document.getElementById('gzNearMap').href = mapsUrl(top.t);
       card.hidden = false;
       msg.textContent = top.d > 40
         ? 'Parece que estás fuera de la ciudad; esta es la sede más cercana.'
         : '';
     }
 
-    function fallo(e){
-      var txt = {
-        1: 'Necesitamos permiso para ver tu ubicación. Actívalo en tu navegador e intenta de nuevo.',
-        2: 'No pudimos obtener tu ubicación. Revisa que el GPS o la ubicación estén activos.',
-        3: 'Tardó demasiado en encontrarte. Intenta de nuevo.'
-      };
-      msg.textContent = txt[e && e.code] || txt[2];
-    }
-
     btn.addEventListener('click', function(){
-      if (!('geolocation' in navigator)){
-        msg.textContent = 'Tu navegador no permite ubicarte. Elige tu tienda de la lista.';
-        return;
-      }
       btn.disabled = true;
       btn.textContent = '📍 Buscándote…';
       msg.textContent = '';
-      navigator.geolocation.getCurrentPosition(function(pos){
+      ubicar(function(){
         btn.disabled = false;
         btn.textContent = LABEL;
-        mostrar(pos.coords.latitude, pos.coords.longitude);
-      }, function(e){
+      }, function(code){
         btn.disabled = false;
         btn.textContent = LABEL;
-        fallo(e);
-      }, { enableHighAccuracy:false, timeout:12000, maximumAge:300000 });
+        msg.textContent = ERRORES[code];
+      });
     });
+
+    /* ---- botón flotante "Más cerca de ti" ----
+       Aparece al pasar la portada. Cada toque cambia la frase (con la distancia real
+       cuando ya te ubicó) y abre una burbuja con la sede más cercana. */
+    var fab    = document.getElementById('gzFab');
+    var fabTxt = document.getElementById('gzFabTxt');
+    var pop    = document.getElementById('gzFabPop');
+    var FRASES = [
+      function(d){ return 'Más cerca de ti · ' + d; },
+      function(d){ return '¡Tu antojo está a ' + d + '!'; },
+      function(d){ return 'A solo ' + d + ' de un Grattisimo'; },
+      function(d){ return 'Más cerca de lo que crees · ' + d; },
+      function(d){ return '¿Otro? Está a ' + d; }
+    ];
+    var toques = 0;
+
+    function decir(txt){
+      fabTxt.textContent = txt;
+      fabTxt.classList.remove('swap');
+      void fabTxt.offsetWidth; /* reinicia la animación */
+      fabTxt.classList.add('swap');
+    }
+    function latido(){
+      fab.classList.remove('pop');
+      void fab.offsetWidth;
+      fab.classList.add('pop');
+    }
+
+    function abrirPop(orden){
+      var top = orden[0];
+      document.getElementById('gzFabName').textContent = 'Grattisimo ' + top.t[0];
+      document.getElementById('gzFabDist').textContent = 'A unos ' + fmtKm(top.d) + ' de ti · en línea recta';
+      document.getElementById('gzFabPy').href  = top.t[1];
+      document.getElementById('gzFabMap').href = mapsUrl(top.t);
+      document.getElementById('gzFabErr').hidden = true;
+      document.getElementById('gzFabOk').hidden = false;
+      pop.hidden = false;
+      fab.setAttribute('aria-expanded', 'true');
+    }
+    function errorPop(code){
+      var e = document.getElementById('gzFabErr');
+      e.textContent = ERRORES[code];
+      e.hidden = false;
+      document.getElementById('gzFabOk').hidden = true;
+      pop.hidden = false;
+      fab.setAttribute('aria-expanded', 'true');
+    }
+    function cerrarPop(){
+      pop.hidden = true;
+      fab.setAttribute('aria-expanded', 'false');
+    }
+
+    /* cada toque = frase nueva (la ubicación queda en caché 5 min, así que
+       los toques siguientes responden al instante) */
+    fab.addEventListener('click', function(){
+      latido();
+      if (fab.classList.contains('busy')) return;
+      if (pop.hidden) decir('Buscándote…');
+      fab.classList.add('busy');
+      ubicar(function(orden){
+        fab.classList.remove('busy');
+        decir(FRASES[toques++ % FRASES.length](fmtKm(orden[0].d)));
+        abrirPop(orden);
+      }, function(code){
+        fab.classList.remove('busy');
+        decir('Más cerca de ti');
+        errorPop(code);
+      });
+    });
+    document.getElementById('gzFabClose').addEventListener('click', cerrarPop);
+    document.addEventListener('keydown', function(e){ if (e.key === 'Escape') cerrarPop(); });
+    document.addEventListener('click', function(e){
+      if (!pop.hidden && !pop.contains(e.target) && !fab.contains(e.target)) cerrarPop();
+    });
+
+    /* se muestra al dejar atrás la portada */
+    function fabVisible(){ fab.classList.toggle('show', window.scrollY > window.innerHeight * .6); }
+    window.addEventListener('scroll', fabVisible, { passive:true });
+    fabVisible();
   })();
 
   /* contador animado de cifras (respaldo) */
